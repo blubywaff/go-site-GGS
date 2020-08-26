@@ -1,0 +1,15 @@
+@import url(http://fonts.googleapis.com/css?family=Roboto+Slab:400,800);
+.POSlink button{
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 24px;
+    display: inline-block;
+    margin: auto;
+}
+.POSlink {
+    text-align: center;
+}

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="Timer-main.css">
+    <link rel="stylesheet" href="MAIN-nav.css">
+    <link rel="stylesheet" href="MAIN-standardHeader.css">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-144904340-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-144904340-1');//
+    </script>
+    <link rel="icon" type="image/png" href="modCookie.png" />
+    <script src="Timer-Timer.js"></script>
+    <audio src="Timer-aaAAhh.mp4" type="audio/mp4" id="aaAAhhdio"></audio>
+    <title>Timer</title>
+</head>
+<div class="spacer10"></div>
+<head>
+    <ul class="nav">
+        <li><a href="HomePage-HomePageHTML.html">Home</a></li>
+        <li><a href="ProofOS-ProofOfSkillsHTML.html">Proof of skills</a></li>
+        <li><a href="#clients">Products</a></li>
+        <li><a href="#contact">About Us</a></li>
+    </ul>
+</head>
+<div class="spacer10"></div>
+<header>Timer</header>
+<div class="spacer10"></div>
+<body>
+<h1 id="timeLabel" style="background-color: #00ccff;">00:00:00</h1>
+<p><h2 class="timeChangeLabel">Set Time:</h2><input type="text" id="setField"><button onclick="set()" class="timeChanger">Set</button></p>
+<p><h2 class="timeChangeLabel">Add Time:</h2><input type="text" id="addField"><button onclick="add()" class="timeChanger">Add</button></p>
+<p><h2 class="timeChangeLabel">Remove Time:</h2><input type="text" id="removeField"><button onclick="remove()" class="timeChanger">Remove</button></p>
+<p><button onclick="start()" id="startButton">Start</button><button onclick="stop()" id="stopButton" disabled="disabled">Stop</button><button onclick="reset()" id="resetButton" disabled="disabled">Reset</button></p>
+</body>
+</html>

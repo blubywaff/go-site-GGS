@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="Weibull-main.css">
+    <link rel="stylesheet" href="MAIN-nav.css">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-144904340-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-144904340-1');//
+    </script>
+    <link rel="icon" type="image/png" href="modCookie.png" />
+    <title>Web Weibull</title>
+    <script src="Weibull-WeibullMaths.js"></script>
+    <script src="Weibull-StuffManager.js"></script>
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+    <script src="Weibull-Graph.js"></script>
+    <script>function GO() {
+        getIns();
+        setOut();
+        generateLine();
+        generateData();
+        makeGraph();
+    }</script>
+    <script>window.onload = function () {
+        makeGraph();
+    }</script>
+</head>
+<div class="spacer10"></div>
+<ul class="nav">
+    <li><a href="HomePage-HomePageHTML.html">Home</a></li>
+    <li><a href="ProofOS-ProofOfSkillsHTML.html">Proof of skills</a></li>
+    <li><a href="#clients">Products</a></li>
+    <li><a href="#contact">About Us</a></li>
+</ul>
+<div class="spacer10"></div>
+<header>Web Weibull</header>
+<body>
+<section>
+    <h2>Your data:</h2>
+    <p>Times to failure (comma separated, non-zero): <input type="text" id="fail"> </p>
+    <p>Suspensions (comma separated, non-zero): <input type="text" id="susp"> </p>
+    <p><button onclick="GO()">Submit</button> </p>
+</section>
+<section>
+
+    <h2>Output Values:</h2>
+    <p id="eta">eta: </p>
+    <p id="beta">beta:</p>
+    <p id="r2">r-squared: </p>
+
+</section>
+<section>
+    <h2>Graph <button onclick="changeLog()" id="logbut">Log</button></h2>
+    <h3 id="connection"></h3>
+    <script src="Weibull-Graph.js"></script>
+    <div id="chartContainer" style="height: 370px; width: 100%;"></div>
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+</section>
+</body>
+</html>

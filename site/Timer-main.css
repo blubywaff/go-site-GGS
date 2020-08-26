@@ -1,0 +1,12 @@
+.timeChangeLabel {
+    display: inline-block;
+    padding-right: 10px;
+}
+body {
+    text-align: center;
+}
+#timeLabel {
+    margin: auto;
+    height: 100%;
+    width: 15%;
+}
