@@ -8,10 +8,18 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
 var tpls *template.Template
+
+var badChars map[string]string
+
+type fileData struct {
+	File string
+	Name  string
+}
 
 func getTime() string {
 	return time.Now().Format("01/02/2006 at 15:04:05 in timezone: MST -0700")
@@ -23,6 +31,12 @@ func init() {
 	}
 
 	tpls = template.Must(template.New("").Funcs(fm).ParseGlob("templates/*.gohtml"))
+
+	badChars = map[string]string{
+		"#": "%23",
+		" ": "%20",
+	}
+
 }
 
 func serveTime(w http.ResponseWriter, req *http.Request) {
@@ -30,7 +44,6 @@ func serveTime(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	//indexTpl.ExecuteTemplate(w, "index.gohtml", time.Now().Format("01/02/2006 at 15:04:05 in timezone: MST -0700 "))
 	tpls.ExecuteTemplate(w, "time.gohtml", req.FormValue("value"))
-	//fmt.Println(req)
 }
 
 func favicon(w http.ResponseWriter, req *http.Request) {
@@ -38,8 +51,6 @@ func favicon(w http.ResponseWriter, req *http.Request) {
 }
 
 func sendfile(w http.ResponseWriter, req *http.Request) {
-
-	//var s string
 
 	if req.Method == http.MethodPost {
 		f, h, err := req.FormFile("file")
@@ -68,10 +79,10 @@ func sendfile(w http.ResponseWriter, req *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		
+
 		if req.FormValue("sendback") == "on" {
 			http.ServeFile(w, req, filepath.Join("./recieved/", h.Filename))
-		return
+			return
 		}
 
 	}
@@ -82,9 +93,10 @@ func sendfile(w http.ResponseWriter, req *http.Request) {
 }
 
 func returnRecieved(w http.ResponseWriter, req *http.Request) {
-	//fmt.Println(req.URL.Path)
+	fmt.Println(req.URL.Path)
 
 	if req.URL.Path == "/recieved/" {
+		fmt.Println(req.URL.Path)
 		var files []string
 
 		err := filepath.Walk("./recieved", func(path string, info os.FileInfo, err error) error {
@@ -96,14 +108,51 @@ func returnRecieved(w http.ResponseWriter, req *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+
+		files = escapeBads(files[1:])
+		fileNames := unescapeBads(files)
+
 		fmt.Println(files)
-		tpls.ExecuteTemplate(w, "recieved.gohtml", files[1:])
+		fmt.Println(fileNames)
+
+		var fileDatas []fileData
+
+		for i, file := range files {
+		fileDatas = append(fileDatas, fileData{file, fileNames[i]})
+		}
+
+		tpls.ExecuteTemplate(w, "recieved.gohtml", fileDatas)
 		return
 
 	}
 
-	//http.ServeFile(w, req, filepath.Join(".", req.URL.Path))
-	http.ServeFile(w, req, string(req.URL.Path))
+	http.ServeFile(w, req, filepath.Join(".", req.URL.Path))
+}
+
+func escapeBads(slice []string) []string {
+	strs := make([]string, len(slice))
+	copy(strs, slice)
+
+	for key, _ := range badChars {
+		for strI, str := range strs {
+			strs[strI] = strings.Replace(str, key, badChars[key], -1)
+		}
+	}
+
+	return strs
+}
+
+func unescapeBads(slice []string) []string {
+	strs := make([]string, len(slice))
+	copy(strs, slice)
+
+	for key, val := range badChars {
+		for strI, str := range strs {
+			strs[strI] = strings.Replace(str, val, key, -1)
+		}
+	}
+
+	return strs
 }
 
 func main() {
@@ -113,7 +162,6 @@ func main() {
 	http.HandleFunc("/favicon.ico", favicon)
 	http.HandleFunc("/sendfile", sendfile)
 	http.HandleFunc("/recieved/", returnRecieved)
-	//http.Handle("/recieved/", http.FileServer(http.Dir(".")))
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
