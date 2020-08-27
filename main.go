@@ -14,7 +14,7 @@ import (
 var tpls *template.Template
 
 func getTime() string {
-	return time.Now().Format("01/02/2006 at 15:04:05 in timezone: MST -0700 ")
+	return time.Now().Format("01/02/2006 at 15:04:05 in timezone: MST -0700")
 }
 
 func init() {
@@ -30,7 +30,7 @@ func serveTime(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	//indexTpl.ExecuteTemplate(w, "index.gohtml", time.Now().Format("01/02/2006 at 15:04:05 in timezone: MST -0700 "))
 	tpls.ExecuteTemplate(w, "time.gohtml", req.FormValue("value"))
-	fmt.Println(req)
+	//fmt.Println(req)
 }
 
 func favicon(w http.ResponseWriter, req *http.Request) {
@@ -82,7 +82,26 @@ func sendfile(w http.ResponseWriter, req *http.Request) {
 }
 
 func returnRecieved(w http.ResponseWriter, req *http.Request) {
-	fmt.Println(req.URL.Path)
+	//fmt.Println(req.URL.Path)
+
+	if req.URL.Path == "/recieved/" {
+		var files []string
+
+		err := filepath.Walk("./recieved", func(path string, info os.FileInfo, err error) error {
+			files = append(files, info.Name())
+			return nil
+		})
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		fmt.Println(files)
+		tpls.ExecuteTemplate(w, "recieved.gohtml", files[1:])
+		return
+
+	}
+
 	//http.ServeFile(w, req, filepath.Join(".", req.URL.Path))
 	http.ServeFile(w, req, string(req.URL.Path))
 }
@@ -94,6 +113,7 @@ func main() {
 	http.HandleFunc("/favicon.ico", favicon)
 	http.HandleFunc("/sendfile", sendfile)
 	http.HandleFunc("/recieved/", returnRecieved)
+	//http.Handle("/recieved/", http.FileServer(http.Dir(".")))
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
