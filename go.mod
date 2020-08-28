@@ -1,3 +1,9 @@
-module galletagamesandsoftware.com/blubywaff/http
+module galletagamesandsoftware.com/blubywaff/go-site-GGS
 
 go 1.15
+
+require (
+	github.com/google/uuid v1.1.1
+	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
+	golang.org/x/tools v0.0.0-20200828161849-5deb26317202 // indirect
+)
