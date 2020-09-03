@@ -62,5 +62,5 @@ func main() {
 	http.HandleFunc("/login/", login)
 	http.HandleFunc("/logout/", logout)
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":80", nil))
 }
