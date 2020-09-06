@@ -19,7 +19,7 @@ func sendfile(w http.ResponseWriter, req *http.Request) {
 		f, h, err := req.FormFile("file")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return 
 		}
 		defer f.Close()
 

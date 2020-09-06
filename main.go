@@ -5,6 +5,9 @@ import (
 	"log"
 	"net/http"
 	"time"
+	_ "github.com/go-sql-driver/mysql"
+	"database/sql"
+	"fmt"
 )
 
 var tpls *template.Template
@@ -21,6 +24,7 @@ func init() {
 	}
 
 	tpls = template.Must(template.New("").Funcs(fm).ParseGlob("templates/*.gohtml"))
+	tpls.ParseGlob("site/*")
 
 	badChars = map[string]string{
 		"#": "%23",
@@ -28,7 +32,8 @@ func init() {
 	}
 
 	dbSessionsCleaned = time.Now()
-
+	timer := time.AfterFunc(time.Second, cleaner)
+	defer timer.Stop()
 }
 
 func serveTime(w http.ResponseWriter, req *http.Request) {
@@ -39,7 +44,7 @@ func serveTime(w http.ResponseWriter, req *http.Request) {
 }
 
 func favicon(w http.ResponseWriter, req *http.Request) {
-	http.ServeFile(w, req, "site/favicon.ico")
+	http.ServeFile(w, req, "assets/favicon.ico")
 }
 
 func cookie(w http.ResponseWriter, req *http.Request) {
@@ -50,17 +55,96 @@ func cookie(w http.ResponseWriter, req *http.Request) {
 	})
 }
 
+func index(w http.ResponseWriter, req *http.Request) {
+	redirect(w, req, "home")
+}
+
+func redirect(w http.ResponseWriter, req *http.Request, dest string) {
+	c, err := req.Cookie("session")
+	if err != nil {
+		panic(err)
+	}
+	c.MaxAge = sessionLength
+	http.SetCookie(w, c)
+	http.Redirect(w, req, dest, http.StatusSeeOther)
+}
+
+func sessionCookie(w http.ResponseWriter, req *http.Request) {
+	c, err := req.Cookie("session")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	c.MaxAge = sessionLength
+	http.SetCookie(w, c)
+}
+
+func site(w http.ResponseWriter, req *http.Request) {
+	//sessionCookie(w, req)
+	http.ServeFile(w, req, "site/" + req.URL.Path)
+}
+
+func sUp(h http.HandlerFunc) http.HandlerFunc {
+	fmt.Println("hello")
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		c, err := r.Cookie("session")
+		fmt.Println("cerr", err)
+		if err == nil {
+			http.SetCookie(w, &http.Cookie{Name: "session", Value: c.Value, MaxAge: sessionLength, Path: "/"})
+			updateSession(c.Value, time.Now().Format(dbTimeFormat))
+		}
+		h.ServeHTTP(w, r)
+	})
+}
+
+func sendHome(w http.ResponseWriter, req *http.Request) {
+	http.Redirect(w, req, "/home/", http.StatusSeeOther)
+}
+
+func home(w http.ResponseWriter, req *http.Request) {
+	tpls.ExecuteTemplate(w, "HomePage.gohtml", nil)
+}
+
 func main() {
 
-	http.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("./site"))))
-	http.HandleFunc("/time/", serveTime)
-	http.HandleFunc("/favicon.ico", favicon)
-	http.HandleFunc("/sendfile", sendfile)
-	http.HandleFunc("/recieved/", returnRecieved)
-	http.HandleFunc("/cookies/", cookie)
-	http.HandleFunc("/signup/", signUp)
-	http.HandleFunc("/login/", login)
-	http.HandleFunc("/logout/", logout)
+	var err error
+	usersdb, err = sql.Open("mysql", "root:manhin0717@tcp(localhost:3306)/testdb?charset=utf8")
+	check(err)
+	defer usersdb.Close()
+	//err = usersdb.Ping()
+	check(err)
+	
+	timer := time.AfterFunc(time.Second, cleaner)
+	defer timer.Stop()
 
-	log.Fatal(http.ListenAndServe(":80", nil))
+	mux := http.NewServeMux()
+
+	
+	//http.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("./site"))))
+	//mux.HandleFunc("/", site)
+	mux.HandleFunc("/", sendHome)
+	mux.HandleFunc("/home/", home)
+	mux.HandleFunc("/time/", serveTime)
+	mux.HandleFunc("/favicon.ico", favicon)
+	mux.HandleFunc("/sendfile/", sendfile)
+	mux.HandleFunc("/recieved/", returnRecieved)
+	mux.HandleFunc("/cookies/", cookie)
+	mux.HandleFunc("/signup/", signUp)
+	mux.HandleFunc("/login/", login)
+	mux.HandleFunc("/logout/", logout)
+
+	mux.HandleFunc("/test", test)
+	mux.HandleFunc("/test2", test2)
+
+
+	log.Fatal(http.ListenAndServe(":80", http.HandlerFunc(func (w http.ResponseWriter, req *http.Request) {
+		c, err := req.Cookie("session")
+		fmt.Println("cerr", err)
+		if err == nil {
+			http.SetCookie(w, &http.Cookie{Name: "session", Value: c.Value, MaxAge: sessionLength, Path: "/"})
+			updateSession(c.Value, time.Now().Format(dbTimeFormat))
+		}
+		mux.ServeHTTP(w, req)
+	})))
+	
 }
