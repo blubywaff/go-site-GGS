@@ -20,9 +20,9 @@ func test(w http.ResponseWriter, req *http.Request) {
 	if err == nil {
 		http.SetCookie(w, &http.Cookie{Name: "test", Value: c.Value, MaxAge: 60,})
 	}
-	fmt.Println(c, err)
+	//fmt.Println(c, err)
 	if req.Method == http.MethodPost {
-		fmt.Println(req.FormValue("username"))
+		//fmt.Println(req.FormValue("username"))
 		http.SetCookie(w, &http.Cookie{Name: "test", Value: "00000000-0000-0000-0000-000000000000", MaxAge: 60,})
 		http.Redirect(w, req, "/test2", http.StatusSeeOther)
 	}
@@ -30,10 +30,10 @@ func test(w http.ResponseWriter, req *http.Request) {
 }
 
 func test2(w http.ResponseWriter, req *http.Request) {
-	c, err := req.Cookie("test")
+	c, _ := req.Cookie("test")
 	c.Value = "oof"
-	fmt.Println("err", err)
-	fmt.Println("cVal", c.Value)
+	//fmt.Println("err", err)
+	//fmt.Println("cVal", c.Value)
 	//http.SetCookie(w, c)
 	tpls.ExecuteTemplate(w, "signup.gohtml", nil)
 }

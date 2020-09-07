@@ -78,5 +78,6 @@ func writeSession(sessionID string, username string, lastActivity string) {
 
 func updateSession(sessionID string, lastActivity string) {
 	_, err := usersdb.Exec("update sessions set lastActivity = '" + lastActivity + "' where sessionID = '" + sessionID + "';")
-	fmt.Println(err)
+	//fmt.Println(err)
+	check(err)
 }

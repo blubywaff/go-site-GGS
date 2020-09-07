@@ -1,0 +1,1 @@
+This directory is the storage position for the temporary files that the server recieves from the sendfile page

@@ -8,6 +8,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"database/sql"
 	"fmt"
+	"strings"
+	"os"
 )
 
 var tpls *template.Template
@@ -24,7 +26,7 @@ func init() {
 	}
 
 	tpls = template.Must(template.New("").Funcs(fm).ParseGlob("templates/*.gohtml"))
-	tpls.ParseGlob("site/*")
+	tpls.ParseGlob("pages/*.gohtml")
 
 	badChars = map[string]string{
 		"#": "%23",
@@ -85,10 +87,10 @@ func site(w http.ResponseWriter, req *http.Request) {
 }
 
 func sUp(h http.HandlerFunc) http.HandlerFunc {
-	fmt.Println("hello")
+	//fmt.Println("hello")
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		c, err := r.Cookie("session")
-		fmt.Println("cerr", err)
+		//fmt.Println("cerr", err)
 		if err == nil {
 			http.SetCookie(w, &http.Cookie{Name: "session", Value: c.Value, MaxAge: sessionLength, Path: "/"})
 			updateSession(c.Value, time.Now().Format(dbTimeFormat))
@@ -102,7 +104,20 @@ func sendHome(w http.ResponseWriter, req *http.Request) {
 }
 
 func home(w http.ResponseWriter, req *http.Request) {
-	tpls.ExecuteTemplate(w, "HomePage.gohtml", nil)
+	tpls.ExecuteTemplate(w, "homepage.gohtml", nil)
+}
+
+func proofos(w http.ResponseWriter, req *http.Request) {
+	if strings.HasSuffix(req.URL.Path, "/proofos/") {
+		tpls.ExecuteTemplate(w, "proofofskills.gohtml", nil)
+		return
+	}
+	http.ServeFile(w, req, "site/" + req.URL.Path[9:])
+}
+
+func fileHandle(w http.ResponseWriter, req *http.Request) {
+	file := "assets/" + strings.Split(req.URL.Path, "/")[len(strings.Split(req.URL.Path, "/"))-1]
+	http.ServeFile(w, req, file)
 }
 
 func main() {
@@ -118,12 +133,16 @@ func main() {
 	defer timer.Stop()
 
 	mux := http.NewServeMux()
+	fileMux := http.NewServeMux()
+
+	fileMux.HandleFunc("/",  fileHandle)
 
 	
 	//http.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("./site"))))
 	//mux.HandleFunc("/", site)
 	mux.HandleFunc("/", sendHome)
 	mux.HandleFunc("/home/", home)
+	mux.HandleFunc("/proofos/", proofos)
 	mux.HandleFunc("/time/", serveTime)
 	mux.HandleFunc("/favicon.ico", favicon)
 	mux.HandleFunc("/sendfile/", sendfile)
@@ -138,11 +157,25 @@ func main() {
 
 
 	log.Fatal(http.ListenAndServe(":80", http.HandlerFunc(func (w http.ResponseWriter, req *http.Request) {
+		fmt.Println(req.URL.Path)
 		c, err := req.Cookie("session")
-		fmt.Println("cerr", err)
+		//fmt.Println("cerr", err)
+		//fmt.Println(req.URL.Path)
 		if err == nil {
 			http.SetCookie(w, &http.Cookie{Name: "session", Value: c.Value, MaxAge: sessionLength, Path: "/"})
 			updateSession(c.Value, time.Now().Format(dbTimeFormat))
+		}
+		end := strings.Split(req.URL.Path, ".")[len(strings.Split(req.URL.Path, "."))-1]
+		if !strings.Contains(req.URL.Path, "/recieved/") && end != "gohtml" && end != "css" && end != "js" && end != "html" {
+			file := "./assets/" + strings.Split(req.URL.Path, "/")[len(strings.Split(req.URL.Path, "/"))-1]
+			fmt.Println("file", file)
+			this, err := os.Stat(file)
+			fmt.Println("osstat", err, this.Name(), os.IsExist(err))
+			if this.Name() != "assets" && (os.IsExist(err) || (!os.IsExist(err) && err == nil)) {
+				fmt.Println("into ere")
+				fileMux.ServeHTTP(w, req)
+				return
+			}
 		}
 		mux.ServeHTTP(w, req)
 	})))
