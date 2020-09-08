@@ -123,7 +123,7 @@ func fileHandle(w http.ResponseWriter, req *http.Request) {
 func main() {
 
 	var err error
-	usersdb, err = sql.Open("mysql", "root:manhin0717@tcp(localhost:3306)/testdb?charset=utf8")
+	usersdb, err = sql.Open("mysql", "root:password@tcp(localhost:3306)/testdb?charset=utf8")
 	check(err)
 	defer usersdb.Close()
 	//err = usersdb.Ping()
@@ -157,7 +157,7 @@ func main() {
 
 
 	log.Fatal(http.ListenAndServe(":80", http.HandlerFunc(func (w http.ResponseWriter, req *http.Request) {
-		fmt.Println(req.URL.Path)
+		//fmt.Println(req.URL.Path)
 		c, err := req.Cookie("session")
 		//fmt.Println("cerr", err)
 		//fmt.Println(req.URL.Path)
@@ -168,11 +168,11 @@ func main() {
 		end := strings.Split(req.URL.Path, ".")[len(strings.Split(req.URL.Path, "."))-1]
 		if !strings.Contains(req.URL.Path, "/recieved/") && end != "gohtml" && end != "css" && end != "js" && end != "html" {
 			file := "./assets/" + strings.Split(req.URL.Path, "/")[len(strings.Split(req.URL.Path, "/"))-1]
-			fmt.Println("file", file)
+			//fmt.Println("file", file)
 			this, err := os.Stat(file)
-			fmt.Println("osstat", err, this.Name(), os.IsExist(err))
-			if this.Name() != "assets" && (os.IsExist(err) || (!os.IsExist(err) && err == nil)) {
-				fmt.Println("into ere")
+			//fmt.Println("osstat", err, this.Name(), os.IsExist(err))
+			if this != nil && this.Name() != "assets" && (os.IsExist(err) || (!os.IsExist(err) && err == nil)) {
+				//fmt.Println("into ere")
 				fileMux.ServeHTTP(w, req)
 				return
 			}

@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 	"time"
 	"database/sql"
-	"fmt"
 )
 
 var usersdb *sql.DB
@@ -50,6 +49,7 @@ func alreadyLoggedIn(w http.ResponseWriter, req *http.Request) bool {
 func signUp(w http.ResponseWriter, req *http.Request) {
 	if alreadyLoggedIn(w, req) {
 		http.Redirect(w, req, "/", http.StatusSeeOther)
+		return
 	}
 
 	if req.Method == http.MethodPost {
@@ -154,8 +154,8 @@ func cleanSessions() {
 }
 
 func cleaner() {
-	for now := range time.Tick(time.Second * time.Duration(5)) {
-		fmt.Println(now)
+	for _ = range time.Tick(time.Second * time.Duration(5)) {
+		//fmt.Println(now)
 		cleanSessions()
 	}
 }
