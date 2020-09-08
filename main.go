@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 	"os"
+	"io"
 )
 
 var tpls *template.Template
@@ -120,10 +121,14 @@ func fileHandle(w http.ResponseWriter, req *http.Request) {
 	http.ServeFile(w, req, file)
 }
 
+func ping(w http.ResponseWriter, req *http.Request) {
+	io.WriteString(w, "OK")
+}
+
 func main() {
 
 	var err error
-	usersdb, err = sql.Open("mysql", "root:password@tcp(localhost:3306)/testdb?charset=utf8")
+	usersdb, err = sql.Open("mysql", "root:password@tcp(localhost:3306)/testdb?charset=utf8")//
 	check(err)
 	defer usersdb.Close()
 	//err = usersdb.Ping()
@@ -154,6 +159,8 @@ func main() {
 
 	mux.HandleFunc("/test", test)
 	mux.HandleFunc("/test2", test2)
+
+	mux.HandleFunc("/ping/", ping)
 
 
 	log.Fatal(http.ListenAndServe(":80", http.HandlerFunc(func (w http.ResponseWriter, req *http.Request) {
