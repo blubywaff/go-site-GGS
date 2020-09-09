@@ -1,3 +1,6 @@
 recieved/*
 go-site-GGS
 !recieved/readme.md
+TLS/*
+!TLS/readme.md
+*.pem

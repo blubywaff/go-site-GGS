@@ -168,8 +168,7 @@ func main() {
 	mux.HandleFunc("/ping/", ping)
 	mux.HandleFunc("/log/", getLog)
 
-
-	log.Fatal(http.ListenAndServe(":80", http.HandlerFunc(func (w http.ResponseWriter, req *http.Request) {
+	handlerfunc := http.HandlerFunc(func (w http.ResponseWriter, req *http.Request) {
 		//fmt.Println(req.URL.Path)
 		c, err := req.Cookie("session")
 		//fmt.Println("cerr", err)
@@ -191,6 +190,8 @@ func main() {
 			}
 		}
 		mux.ServeHTTP(w, req)
-	})))
+	})
+
+	log.Fatal(http.ListenAndServeTLS(":443", "TLS/cert.pem", "TLS/privkey.pem", handlerfunc))
 	
 }
