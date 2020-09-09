@@ -75,6 +75,7 @@ func redirect(w http.ResponseWriter, req *http.Request, dest string) {
 func sessionCookie(w http.ResponseWriter, req *http.Request) {
 	c, err := req.Cookie("session")
 	if err != nil {
+		logger(err.Error())
 		fmt.Println(err)
 		return
 	}
@@ -125,10 +126,14 @@ func ping(w http.ResponseWriter, req *http.Request) {
 	io.WriteString(w, "OK")
 }
 
+func getLog(w http.ResponseWriter, req *http.Request) {
+	tpls.ExecuteTemplate(w, "log.gohtml", logs)
+}
+
 func main() {
 
 	var err error
-	usersdb, err = sql.Open("mysql", "root:password@tcp(localhost:3306)/testdb?charset=utf8")//
+	usersdb, err = sql.Open("mysql", "root:password@tcp(localhost:3306)/usersdb?charset=utf8")
 	check(err)
 	defer usersdb.Close()
 	//err = usersdb.Ping()
@@ -161,6 +166,7 @@ func main() {
 	mux.HandleFunc("/test2", test2)
 
 	mux.HandleFunc("/ping/", ping)
+	mux.HandleFunc("/log/", getLog)
 
 
 	log.Fatal(http.ListenAndServe(":80", http.HandlerFunc(func (w http.ResponseWriter, req *http.Request) {

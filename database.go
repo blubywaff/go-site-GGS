@@ -16,6 +16,7 @@ func contains(data *sql.DB, find string, col string, table string) bool {
 	}
 	defer rs.Close()
 	if err != nil {
+		logger(err.Error())
 		fmt.Println(err)
 		return false
 	}
@@ -30,6 +31,7 @@ func find(data *sql.DB, find string, col string, table string, resultCol string)
 	rs, err := data.Query("select " + resultCol + " from " + table + " where " + col + "='" + find + "';")
 	defer rs.Close()
 	if err != nil {
+		logger(err.Error())
 		fmt.Println(err)
 		return ""
 	}
