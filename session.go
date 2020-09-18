@@ -5,10 +5,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"github.com/google/uuid"
 	"time"
-	"database/sql"
+	"go.mongodb.org/mongo-driver/bson"
+	"context"
 )
-
-var usersdb *sql.DB
 
 var dbSessionsCleaned time.Time
 
@@ -43,7 +42,7 @@ func alreadyLoggedIn(w http.ResponseWriter, req *http.Request) bool {
 		return false
 	}
 	http.SetCookie(w, &http.Cookie{Name: "session", Value: c.Value, MaxAge: 60, Path: "/"})
-	return contains(usersdb, c.Value, "sessionID", "sessions")
+	return containsSession(bson.D{{"SessionID", c.Value}})
 }
 
 func signUp(w http.ResponseWriter, req *http.Request) {
@@ -53,26 +52,27 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if req.Method == http.MethodPost {
-		un := req.FormValue("username")
-		p := req.FormValue("password")
-		f := req.FormValue("firstname")
-		l := req.FormValue("lastname")
+		username := req.FormValue("username")
+		email := req.FormValue("email")
+		firstname := req.FormValue("firstname")
+		lastname := req.FormValue("lastname")
+		password := req.FormValue("password")
 
-		if contains(usersdb, un, "username", "users") {
+		if containsUser(bson.D{{"Username", username}}) {
 			http.Error(w, "Username already taken", http.StatusForbidden)
 			return
 		}
 
 		sID := uuid.New()
 		http.SetCookie(w, &http.Cookie{Name: "session", Value: sID.String(), MaxAge: sessionLength, Path: "/"})
-		bs, err := bcrypt.GenerateFromPassword([]byte(p), bcrypt.DefaultCost)
+		bs, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil {
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
 
-		writeUser(un, string(bs), f, l)
-		writeSession(sID.String(), un, time.Now().Format(dbTimeFormat))
+		writeUser(user{username, email, bs, firstname, lastname})
+		writeSession(session{sID.String(), username, time.Now().Format(dbTimeFormat)})
 		http.Redirect(w, req, "/", http.StatusSeeOther)
 		return
 	}
@@ -91,11 +91,11 @@ func login(w http.ResponseWriter, req *http.Request) {
 		un := req.FormValue("username")
 		p := req.FormValue("password")
 
-		if !contains(usersdb, un, "username", "users") {
+		if !containsUser(bson.D{{"Username", un}}) {
 			http.Error(w, "Invalid Username", http.StatusForbidden)
 			return
 		}
-		err := bcrypt.CompareHashAndPassword([]byte(find(usersdb, un, "username", "users", "password")), []byte(p))
+		err := bcrypt.CompareHashAndPassword(readUser(bson.D{{"Username", un}}).Password, []byte(p))
 		if err != nil {
 			http.Error(w, "Password and username do not match", http.StatusForbidden)
 			return
@@ -107,7 +107,7 @@ func login(w http.ResponseWriter, req *http.Request) {
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
-		writeSession(sID.String(), un, time.Now().Format(dbTimeFormat))
+		writeSession(session{sID.String(), un, time.Now().Format(dbTimeFormat)})
 		http.Redirect(w, req, "/", http.StatusSeeOther)
 		return
 
@@ -130,25 +130,25 @@ func logout(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	remove(usersdb, "sessionID", "sessions", c.Value)
+	removeSession(bson.D{{"SessionID", c.Value}})
 
 	http.SetCookie(w, &http.Cookie{Name: "session", Value: "", MaxAge: -1, Path: "/"})
 
 }
 
 func cleanSessions() {
-	r, _ := usersdb.Query("select sessionID, lastActivity from sessions;")
-	defer r.Close()
-	for r.Next() {
-		var sid string
-		var last string
-		r.Scan(&sid, &last)
-		timeLast, _ := time.Parse(dbTimeFormat, last)
+	cur, err := sessionsdb.Find(context.Background(), bson.D{})
+	check(err)
+	defer cur.Close(context.Background())
+	for cur.Next(context.Background()) {
+		session := session{}
+		err := cur.Decode(&session)
+		check(err)
+		timeLast, _ := time.Parse(dbTimeFormat, session.LastActivity)
 		nowtxt := time.Now().Format(dbTimeFormat)
 		now, _ := time.Parse(dbTimeFormat, nowtxt)
 		if now.Sub(timeLast) > (time.Second * time.Duration(sessionLength)) {
-			_, err := usersdb.Exec("delete from sessions where sessionID='" + sid + "';")
-			check(err)
+			removeSession(bson.D{{"SessionID", session.SessionID}})
 		}
 	}
 }

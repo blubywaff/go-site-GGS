@@ -5,12 +5,14 @@ import (
 	"log"
 	"net/http"
 	"time"
-	_ "github.com/go-sql-driver/mysql"
-	"database/sql"
 	"fmt"
 	"strings"
 	"os"
 	"io"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/bson"
+	"context"
 )
 
 var tpls *template.Template
@@ -95,7 +97,7 @@ func sUp(h http.HandlerFunc) http.HandlerFunc {
 		//fmt.Println("cerr", err)
 		if err == nil {
 			http.SetCookie(w, &http.Cookie{Name: "session", Value: c.Value, MaxAge: sessionLength, Path: "/"})
-			updateSession(c.Value, time.Now().Format(dbTimeFormat))
+			updateSession(bson.D{{"SessionID", c.Value}}, bson.D{{"$set", bson.D{{"LastActivity", time.Now().Format(dbTimeFormat)}}}})
 		}
 		h.ServeHTTP(w, r)
 	})
@@ -131,13 +133,15 @@ func getLog(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
+	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
+	check(err)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	err = client.Connect(ctx)
+	check(err)
 
-	var err error
-	usersdb, err = sql.Open("mysql", "root:password@tcp(localhost:3306)/usersdb?charset=utf8")
-	check(err)
-	defer usersdb.Close()
-	//err = usersdb.Ping()
-	check(err)
+	usersdb = client.Database("usersdb").Collection("users")
+	sessionsdb = client.Database("usersdb").Collection("sessions")
 	
 	timer := time.AfterFunc(time.Second, cleaner)
 	defer timer.Stop()
@@ -175,7 +179,7 @@ func main() {
 		//fmt.Println(req.URL.Path)
 		if err == nil {
 			http.SetCookie(w, &http.Cookie{Name: "session", Value: c.Value, MaxAge: sessionLength, Path: "/"})
-			updateSession(c.Value, time.Now().Format(dbTimeFormat))
+			updateSession(bson.D{{"SessionID", c.Value}}, bson.D{{"$set", bson.D{{"LastActivity", time.Now().Format(dbTimeFormat)}}}})
 		}
 		end := strings.Split(req.URL.Path, ".")[len(strings.Split(req.URL.Path, "."))-1]
 		if !strings.Contains(req.URL.Path, "/recieved/") && end != "gohtml" && end != "css" && end != "js" && end != "html" {
@@ -193,5 +197,4 @@ func main() {
 	})
 
 	log.Fatal(http.ListenAndServeTLS(":443", "TLS/cert.pem", "TLS/privkey.pem", handlerfunc))
-	
 }
