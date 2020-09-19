@@ -45,6 +45,7 @@ func readUser(filter bson.D) user {
 func containsUser(filter bson.D) bool {
 	user := user{}
 	err := usersdb.FindOne(context.Background(), filter).Decode(&user)
+	//fmt.Println("contains", err)
 	check(err)
 	return err == nil
 }

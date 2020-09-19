@@ -5,17 +5,81 @@
 <title>Sign Up</title>
 <head>
 <body>
+<style>
 
-<form method="post">
+</style>
 
-     <input type="email" name="username" placeholder="email"><br>
-    <input type="text" name="password" placeholder="password"><br>
+<form method="post" id="signup-form">
+
+    <input type="text" name="username" id="username" placeholder="username"><p id="username-error"></p>
+    <input type="email" name="email" placeholder="email"><br>
+    <input type="password" name="password" id="password" placeholder="password"><br>
+    <input type="password" name="confirm-password" id="confirm-password" placeholder="confirm password"><p id="password-error"></p>
     <input type="text" name="firstname" placeholder="first name"><br>
     <input type="text" name="lastname" placeholder="last name"><br>
-    <label for="signup">Sign Up</label>
-    <input type="submit" id="signup">
+    <input type="submit" value="Sign Up">
+
 
 </form>
+
+<script>
+    var form = document.querySelector('#signup-form');
+    
+    var passord = document.querySelector('#password');
+    var passwordConfirm = document.querySelector('#confirm-password');
+    var passwordError = document.querySelector('#password-error');
+    
+    form.addEventListener('submit', function(e){
+        e.preventDefault();
+        if(checkPasswords()) {
+            form.submit();
+            return;
+        }
+    });
+    
+    function checkPasswords() {
+        passwordError.textContext = '';
+        if(password.value === '') {
+            passwordError.textContent = 'Enter a password.';
+            return false;
+        }
+        if(passwordConfirm.value === '') {
+            passwordError.textContent = 'Confirm your password.';
+            return false;
+        }
+        if(password.value != passwordConfirm.value) {
+            passwordError.textContent = 'Re-enter passwords.';
+            passwword.value = '';
+            passwordConfirm.value = '';
+            return false;
+            
+        }
+        return true;
+    }
+    
+    
+    var username = document.querySelector('#username');
+    var usernameError = document.querySelector('#username-error')
+
+    form.addEventListener('input', function(){
+        var xmlRequest = new XMLHttpRequest();
+        xmlRequest.open('POST', '/signup/checkusername', true);
+        xmlRequest.addEventListener('readystatechange', function(){
+            if(xmlRequest.readyState === XMLHttpRequest.DONE && xmlRequest.status === 200) {
+                var res = xmlRequest.responseText;
+                if(res == 'true') {
+                    usernameError.textContent = 'Username Taken';
+                    document.querySelector('#signup').disabled = true;
+                } else {
+                    usernameError.textContent = 'Username Available';
+                    document.querySelector('#signup').disabled = false;
+                }
+            }
+        });
+        xmlRequest.send(username.value)
+    });
+    
+</script>
 
 </body>
 </html>

@@ -165,6 +165,7 @@ func main() {
 	mux.HandleFunc("/signup/", signUp)
 	mux.HandleFunc("/login/", login)
 	mux.HandleFunc("/logout/", logout)
+	mux.HandleFunc("/signup/checkusername", checkUsername)
 
 	mux.HandleFunc("/test", test)
 	mux.HandleFunc("/test2", test2)

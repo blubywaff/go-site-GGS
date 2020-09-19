@@ -7,6 +7,8 @@ import (
 	"time"
 	"go.mongodb.org/mongo-driver/bson"
 	"context"
+	"fmt"
+	"io/ioutil"
 )
 
 var dbSessionsCleaned time.Time
@@ -158,4 +160,10 @@ func cleaner() {
 		//fmt.Println(now)
 		cleanSessions()
 	}
+}
+
+func checkUsername(w http.ResponseWriter, req *http.Request) {
+	bytes, err := ioutil.ReadAll(req.Body)
+	check(err)
+	fmt.Fprint(w, containsUser(bson.D{{"Username", string(bytes)}}))
 }
