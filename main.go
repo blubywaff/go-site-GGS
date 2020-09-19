@@ -97,7 +97,7 @@ func sUp(h http.HandlerFunc) http.HandlerFunc {
 		//fmt.Println("cerr", err)
 		if err == nil {
 			http.SetCookie(w, &http.Cookie{Name: "session", Value: c.Value, MaxAge: sessionLength, Path: "/"})
-			updateSession(bson.D{{"SessionID", c.Value}}, bson.D{{"$set", bson.D{{"LastActivity", time.Now().Format(dbTimeFormat)}}}})
+			updateSession(bson.D{{Key: "SessionID", Value: c.Value}}, bson.D{{Key: "$set", Value: bson.D{{Key: "LastActivity", Value: time.Now().Format(dbTimeFormat)}}}})
 		}
 		h.ServeHTTP(w, r)
 	})
@@ -142,6 +142,7 @@ func main() {
 
 	usersdb = client.Database("usersdb").Collection("users")
 	sessionsdb = client.Database("usersdb").Collection("sessions")
+	profilePicturesdb = client.Database("usersdb").Collection("profilepictures")
 	
 	timer := time.AfterFunc(time.Second, cleaner)
 	defer timer.Stop()
@@ -166,6 +167,8 @@ func main() {
 	mux.HandleFunc("/login/", login)
 	mux.HandleFunc("/logout/", logout)
 	mux.HandleFunc("/signup/checkusername", checkUsername)
+	mux.HandleFunc("/account/", account)
+	mux.HandleFunc("/account/profilepicture", profilePicture)
 
 	mux.HandleFunc("/test", test)
 	mux.HandleFunc("/test2", test2)
@@ -180,7 +183,7 @@ func main() {
 		//fmt.Println(req.URL.Path)
 		if err == nil {
 			http.SetCookie(w, &http.Cookie{Name: "session", Value: c.Value, MaxAge: sessionLength, Path: "/"})
-			updateSession(bson.D{{"SessionID", c.Value}}, bson.D{{"$set", bson.D{{"LastActivity", time.Now().Format(dbTimeFormat)}}}})
+			updateSession(bson.D{{Key: "SessionID", Value: c.Value}}, bson.D{{Key: "$set", Value: bson.D{{Key: "LastActivity", Value: time.Now().Format(dbTimeFormat)}}}})
 		}
 		end := strings.Split(req.URL.Path, ".")[len(strings.Split(req.URL.Path, "."))-1]
 		if !strings.Contains(req.URL.Path, "/recieved/") && end != "gohtml" && end != "css" && end != "js" && end != "html" {

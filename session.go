@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"bytes"
 )
 
 var dbSessionsCleaned time.Time
@@ -44,7 +45,7 @@ func alreadyLoggedIn(w http.ResponseWriter, req *http.Request) bool {
 		return false
 	}
 	http.SetCookie(w, &http.Cookie{Name: "session", Value: c.Value, MaxAge: 60, Path: "/"})
-	return containsSession(bson.D{{"SessionID", c.Value}})
+	return containsSession(bson.D{{Key: "SessionID", Value: c.Value}})
 }
 
 func signUp(w http.ResponseWriter, req *http.Request) {
@@ -60,7 +61,7 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 		lastname := req.FormValue("lastname")
 		password := req.FormValue("password")
 
-		if containsUser(bson.D{{"Username", username}}) {
+		if containsUser(bson.D{{Key: "Username", Value: username}}) {
 			http.Error(w, "Username already taken", http.StatusForbidden)
 			return
 		}
@@ -93,11 +94,11 @@ func login(w http.ResponseWriter, req *http.Request) {
 		un := req.FormValue("username")
 		p := req.FormValue("password")
 
-		if !containsUser(bson.D{{"Username", un}}) {
+		if !containsUser(bson.D{{Key: "Username", Value: un}}) {
 			http.Error(w, "Invalid Username", http.StatusForbidden)
 			return
 		}
-		err := bcrypt.CompareHashAndPassword(readUser(bson.D{{"Username", un}}).Password, []byte(p))
+		err := bcrypt.CompareHashAndPassword(readUser(bson.D{{Key: "Username", Value: un}}).Password, []byte(p))
 		if err != nil {
 			http.Error(w, "Password and username do not match", http.StatusForbidden)
 			return
@@ -132,7 +133,7 @@ func logout(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	removeSession(bson.D{{"SessionID", c.Value}})
+	removeSession(bson.D{{Key: "SessionID", Value: c.Value}})
 
 	http.SetCookie(w, &http.Cookie{Name: "session", Value: "", MaxAge: -1, Path: "/"})
 
@@ -150,7 +151,7 @@ func cleanSessions() {
 		nowtxt := time.Now().Format(dbTimeFormat)
 		now, _ := time.Parse(dbTimeFormat, nowtxt)
 		if now.Sub(timeLast) > (time.Second * time.Duration(sessionLength)) {
-			removeSession(bson.D{{"SessionID", session.SessionID}})
+			removeSession(bson.D{{Key: "SessionID", Value: session.SessionID}})
 		}
 	}
 }
@@ -165,5 +166,62 @@ func cleaner() {
 func checkUsername(w http.ResponseWriter, req *http.Request) {
 	bytes, err := ioutil.ReadAll(req.Body)
 	check(err)
-	fmt.Fprint(w, containsUser(bson.D{{"Username", string(bytes)}}))
+	fmt.Fprint(w, containsUser(bson.D{{Key: "Username", Value: string(bytes)}}))
+}
+
+func getUser(w http.ResponseWriter, req *http.Request) user {
+	c, err := req.Cookie("session")
+	check(err)
+	return readUser(bson.D{{Key: "Username", Value: readSession(bson.D{{Key: "SessionID", Value: c.Value}}).Username}})
+}
+
+func hasSession(w http.ResponseWriter, req *http.Request) bool {
+	_, err := req.Cookie("session")
+	return err == nil
+}
+
+func account(w http.ResponseWriter, req *http.Request) {
+	if req.Method == http.MethodPost {
+		if !hasSession(w, req) {
+			http.Redirect(w, req, "/", http.StatusSeeOther)
+			return
+		}
+
+		username := getUser(w, req).Username
+
+		f, _, err := req.FormFile("file")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return 
+		}
+		defer f.Close()
+
+		bs, err := ioutil.ReadAll(f)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if !containsProfilePicture(username) {
+			writeProfilePicture(username, bs)
+		} else {
+			updateProfilePicture(username, bs)
+		}
+		
+
+	}
+
+	if hasSession(w, req) {
+		tpls.ExecuteTemplate(w, "account.gohtml", getUser(w, req))
+	} else {
+		http.Redirect(w, req, "/", http.StatusSeeOther)
+	}
+}
+
+func profilePicture(w http.ResponseWriter, req *http.Request) {
+	if hasSession(w, req) {
+		http.ServeContent(w, req, "profile", time.Now(), bytes.NewReader(readProfilePicture(getUser(w, req).Username)))
+	} else {
+		http.NotFoundHandler()
+	}
 }

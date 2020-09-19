@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        @import url(https://fonts.googleapis.com/css?family=Roboto+Slab:400,800);
+        header {
+            color: #000000;
+            font: 36px "Source Sans Pro", sans-serif;
+            font-weight: 600;
+            text-align: center;
+            border: 5px solid #000000;
+            color: #0000ff;
+            /*background-color: #00ddff;*/
+        }
+        .nav {
+            background-color: yellow;
+            list-style-type: none;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+    
+        .nav li {
+            display: inline-block;
+            font-size: 20px;
+            padding: 20px;
+        }
+        .spacer10 {
+            padding: 10px;
+        }
+        </style>
+        
+        <link rel="icon" type="image/ico" href="favicon.ico" />
+        <title>Proofs of Skills</title>
+    </head>
+    <div class="spacer10"></div>
+    <ul class="nav">
+        <li><a href="/home/">Home</a></li>
+        <li><a href="/proofos/">Proof of skills</a></li>
+        <li><a href="#clients">Products</a></li>
+        <li><a href="#contact">About Us</a></li>
+    </ul>
+    <div class="spacer10"></div>
+    <header>Account</header>
+<body>
+    <p>Username: {{.Username}}</p><br>
+    <p>Email: {{.Email}}</p><br>
+    <p>Name: {{.Firstname}} {{.Lastname}}</p><br>
+    <img src="/account/profilepicture" width="100" height="100">
+    <form method="POST" enctype="multipart/form-data">
+        <label for="idx-f">Update Profile Picture</label>
+        <input type="file" id="idx-f" name="file">
+        <input type="submit" value="Update">
+    </form>
+</body>
+</html>
