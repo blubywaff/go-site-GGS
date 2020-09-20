@@ -10,6 +10,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"bytes"
+	"strings"
+	"image"
+	"image/jpeg"
+	"image/png"
+	"github.com/nfnt/resize"
 )
 
 var dbSessionsCleaned time.Time
@@ -189,17 +194,26 @@ func account(w http.ResponseWriter, req *http.Request) {
 
 		username := getUser(w, req).Username
 
-		f, _, err := req.FormFile("file")
+		f, finfo, err := req.FormFile("file")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return 
 		}
 		defer f.Close()
 
+		if !checkFile(finfo.Filename) {
+			http.Error(w, "Invalid File", http.StatusForbidden)
+		}
+
 		bs, err := ioutil.ReadAll(f)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
+		}
+
+		bs, err = processImage(bs, finfo.Filename)
+		if !check(err) {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 
 		if !containsProfilePicture(username) {
@@ -218,10 +232,40 @@ func account(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func checkFile(name string) bool {
+	return strings.HasSuffix(name, ".png") || strings.HasSuffix(name, ".jpg")
+}
+
 func profilePicture(w http.ResponseWriter, req *http.Request) {
 	if hasSession(w, req) {
 		http.ServeContent(w, req, "profile", time.Now(), bytes.NewReader(readProfilePicture(getUser(w, req).Username)))
 	} else {
 		http.NotFoundHandler()
 	}
+}
+
+func processImage(bs []byte, name string) ([]byte, error) {
+	pngbs := bs
+	if(strings.HasSuffix(name, ".jpg")) {
+		decoded, err := jpeg.Decode(bytes.NewReader(bs))
+		if !check(err) {
+			return nil, err
+		}
+		buffer := new(bytes.Buffer)
+		if err := png.Encode(buffer, decoded); !check(err) {
+			return nil, err
+		}
+		pngbs = buffer.Bytes()
+	}
+	img, _, err := image.Decode(bytes.NewReader(pngbs))
+	if !check(err) {
+		return nil, err
+	}
+	resized := resize.Resize(200, 200, img, resize.Lanczos2)
+	buffer := new(bytes.Buffer)
+	err = png.Encode(buffer, resized)
+	if !check(err) {
+		return nil, err
+	}
+	return buffer.Bytes(), nil
 }
