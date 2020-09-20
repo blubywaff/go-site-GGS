@@ -1,0 +1,61 @@
+{{define "gtag"}}
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-144904340-1"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-144904340-1');//
+</script>
+{{end}}
+
+{{define "globalcss"}}
+<style>
+    /* Fonts */
+    @import url(https://fonts.googleapis.com/css?family=Roboto+Slab:400,800);
+
+    /* Nav */
+    .nav {
+        background-color: yellow;
+        list-style-type: none;
+        text-align: center;
+        margin: 0;
+        padding: 0;
+    }
+    .nav li {
+        display: inline-block;
+        font-size: 20px;
+        padding: 20px;
+    }
+    
+    /* Header */
+    header {
+        color: #000000;
+        font: 36px "Source Sans Pro", sans-serif;
+        font-weight: 600;
+        text-align: center;
+        border: 5px solid #000000;
+        color: #0000ff;
+        /*background-color: #00ddff;*/
+    }
+
+    /* Misc */
+    .spacer10 {
+        padding: 10px;
+    }
+</style>
+{{end}}
+
+{{define "globalscripts"}}
+{{end}}
+
+{{define "globalhead"}}
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/ico" href="favicon.ico">
+    <title>{{.}}</title>
+    {{template "gtag"}}
+    {{template "globalcss"}}
+    {{template "globalscripts"}}
+</head>
+{{end}}
