@@ -19,7 +19,7 @@ import (
 
 var dbSessionsCleaned time.Time
 
-const sessionLength int = 60
+const sessionLength int = 1800
 
 func test(w http.ResponseWriter, req *http.Request) {
 	c, err := req.Cookie("test")
@@ -162,7 +162,7 @@ func cleanSessions() {
 }
 
 func cleaner() {
-	for _ = range time.Tick(time.Second * time.Duration(5)) {
+	for _ = range time.Tick(time.Second * time.Duration(30)) {
 		//fmt.Println(now)
 		cleanSessions()
 	}
@@ -203,6 +203,7 @@ func account(w http.ResponseWriter, req *http.Request) {
 
 		if !checkFile(finfo.Filename) {
 			http.Error(w, "Invalid File", http.StatusForbidden)
+			return
 		}
 
 		bs, err := ioutil.ReadAll(f)
@@ -233,7 +234,7 @@ func account(w http.ResponseWriter, req *http.Request) {
 }
 
 func checkFile(name string) bool {
-	return strings.HasSuffix(name, ".png") || strings.HasSuffix(name, ".jpg")
+	return strings.HasSuffix(strings.ToLower(name), ".png") || strings.HasSuffix(strings.ToLower(name), ".jpg")
 }
 
 func profilePicture(w http.ResponseWriter, req *http.Request) {

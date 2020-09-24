@@ -1,0 +1,80 @@
+Journal Started September 20, 2020
+Project started on August 22, 2020
+
+Project:
+The stated intent of this project was web development with Go. I will be building a website from the ground up, including backend, frontend and, managing server hosting.
+Backend - Golang
+Frontend - html, css, js
+Hosting - Amazon Web Services
+
+Me:
+The Public Site: https://www.galletagamesandsoftware.com/
+The Code: https://github.com/Blubywaff/go-site-GGS
+
+Learning Resources:
+https://www.udemy.com/course/go-programming-language/learn/lecture/5995952#overview
+https://github.com/GoesToEleven/golang-web-dev/
+https://pkg.go.dev
+https://gobyexample.com
+https://stackoverflow.com/
+
+Doing Resources:
+https://github.com/
+https://aws.amazon.com/
+
+
+Step 1 - Learning Phase (08/22/2020 - 09/21/2020)
+Course Overview:
+Section 1: Intro and Golang Review
+Section 2: Templates (Dynamic/User-specific Pages)
+Section 3: Creating a server (TCP in Go)
+Section 4: Understanding http handling (in Go)
+Section 5: Understanding routing
+Section 6: Serving Files
+Section 7: Deploying (How to buy a domain)
+Section 8: Creating State
+Section 9: Creating sessions (Cookies)
+Section 10: AWS
+Section 11: Relational Databases (MySQL)
+Section 12: Scaling on AWS
+Section 13: Photo Blog (Small Example/Practice Project)
+Section 14: Web Dev Toolkit (HMAC, AJAX, Web Storage Introductions)
+Section 15: Go & MongoDB
+Section 16: Docker
+Section 17: PostgreSQL
+Section 18: MongoDB
+
+Week of 08/24/2020 (Work started 08/22/2020) ~15 hours
+This week I spent ~12 hours whatching Sections 1-8 and taking notes.
+I skipped notes over Sections 7 because I already owned my domain.
+I skipped notes Section 3 because it was unnecessary information.
+I also started the backend for the site.
+I built a system that would serve the current time in an html file using a template.
+I built a system to send a recieve files from a client.
+
+Week of 08/31/2020 (Work started 08/28/2020) ~27 hours
+This week I spent ~5 hours watching Sections 9-13 and taking notes.
+I failed to take notes on Section 12 before Friday and it was pushed to the Week of 09/08/2020.
+I built a session system that manages user accounts and logins both on the server and client sides.
+I spent a significant amount of time (>20 hours) setting up RDS and resolving connectivity issues.
+
+Week of 09/08/2020 (Work started 09/06/20) ~18 hours
+This week I watched and took notes of Section 12 from last week.
+I took notes on section 14.
+I spent ~4 hours on notes this week.
+I converted my session system to use MySQL instead of in memory storage.
+I enable TLS & HTTPS on my domain and web server.
+
+Week of 09/14/2020 (Work started 09/14/2020) ~16 hours 
+This week I spent ~3 taking notes on Sections 15 & 16.
+I experimented with Docker (~6 hours) but nothing came of it.
+I decided to use MongoDB over MySQL and PostgreSQL.
+I switched the database of my web server to MongoDB from MySQL (~7 hours).
+
+Week of 09/21/2020 (Work started 09/18/2020) ~12 hours
+This week I was not able to finish Section 18 because the accounts were more important.
+I skipped Section 17 because it was over PostgreSQL which I chose not to use.
+I also changed the users system and changed the signup page to reflect this.
+I added AJAX to the signup page to verify the username.
+I added an account page with functionality to view and change your profile picture.
+
