@@ -81,6 +81,7 @@ func signUp(w http.ResponseWriter, req *http.Request) {
 
 		writeUser(user{username, email, bs, firstname, lastname})
 		writeSession(session{sID.String(), username, time.Now().Format(dbTimeFormat)})
+		writeVotes(Votes{username, map[string]int{}, map[string]int{}})
 		http.Redirect(w, req, "/", http.StatusSeeOther)
 		return
 	}

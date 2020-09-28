@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+{{template "globalhead" "Forum"}}
+<body>
+    {{if .Top}}
+    {{range $t := .Top}}
+    {{template "threadwidget" $t}}
+    {{end}}
+    {{else}}
+    <h1>its quiet here</h1>
+    {{end}}
+</body>
+</html>

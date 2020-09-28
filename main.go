@@ -140,9 +140,13 @@ func main() {
 	err = client.Connect(ctx)
 	check(err)
 
-	usersdb = client.Database("usersdb").Collection("users")
-	sessionsdb = client.Database("usersdb").Collection("sessions")
-	profilePicturesdb = client.Database("usersdb").Collection("profilepictures")
+	usersdb = client.Database("accountdb").Collection("users")
+	sessionsdb = client.Database("accountdb").Collection("sessions")
+	profilePicturesdb = client.Database("accountdb").Collection("profilepictures")
+
+	threadsdb = client.Database("forumdb").Collection("threads")
+	commentsdb = client.Database("forumdb").Collection("comments")
+	votesdb = client.Database("forumdb").Collection("votes")
 	
 	timer := time.AfterFunc(time.Second, cleaner)
 	defer timer.Stop()
@@ -169,6 +173,10 @@ func main() {
 	mux.HandleFunc("/signup/checkusername", checkUsername)
 	mux.HandleFunc("/account/", account)
 	mux.HandleFunc("/account/profilepicture", profilePicture)
+	mux.HandleFunc("/forum/", forum)
+	mux.HandleFunc("/thread/", forumThread)
+	mux.HandleFunc("/createthread/", createThread)
+	mux.HandleFunc("/forum/vote/", vote)
 
 	mux.HandleFunc("/test", test)
 	mux.HandleFunc("/test2", test2)

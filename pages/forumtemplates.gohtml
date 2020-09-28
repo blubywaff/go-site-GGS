@@ -1,0 +1,19 @@
+{{define "comment"}}
+<p>{{.Score}} -- {{.Poster}} --- {{.PostTime}}</p>
+<p><a href="/forum/vote/?comment={{.ID}}&vote=1">++</a><a href="/forum/vote/?comment={{.ID}}&vote=-1">--</a></p>
+<p>{{.Content}}</p>
+{{range .Replies}}
+{{template "comment" .}}
+{{end}}
+{{end}}
+
+{{define "thread"}}
+<p>{{.Poster}} --- {{.PostTime}}</p>
+<h1><p><a href="/forum/vote/?thread={{.ID}}&vote=1">++</a><a href="/forum/vote/?thread={{.ID}}&vote=-1">--</a></p>{{.Score}} | {{.Title}}</h1>
+<p>{{.Body}}</p>
+{{end}}
+
+{{define "threadwidget"}}
+<p>{{.Poster}} --- {{.PostTime}}</p>
+<h1>{{.Score}} | <a href="/thread/?thread={{.ID}}">{{.Title}}</a></h1>
+{{end}}
