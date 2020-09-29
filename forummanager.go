@@ -5,7 +5,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/bson"
 	"context"
-	"fmt"
 )
 
 var threadsdb *mongo.Collection
@@ -72,6 +71,7 @@ func (thread Thread) getFull() FullThread {
 	for _, c := range thread.Replies {
 		fulls = append(fulls, getComment(c).getFull())
 	}
+	full.Replies = fulls
 	return full
 }
 
@@ -88,6 +88,7 @@ func (comment Comment) getFull() FullComment {
 	for _, c := range comment.Replies {
 		fulls = append(fulls, getComment(c).getFull())
 	}
+	full.Replies = fulls
 	return full
 }
 
@@ -96,15 +97,14 @@ type FormData struct {
 }
 
 type Vote struct {
-	Post string
-	IsThread bool
-	Vote int
+	Post string `bson:"Post"`
+	IsThread bool `bson:"IsThread"`
+	Vote int `bson:"Vote"`
 }
 
 type Votes struct {
 	Username string `bson:"Username"`
-	ThreadVotes map[string]int `bson:"ThreadVotes"`
-	CommentVotes map[string]int `bson:"CommentVotes"`
+	Votes []Vote `bson:"Votes"`
 }
 
 /*
@@ -132,7 +132,7 @@ func getForumData() FormData {
 	exclude := bson.A{}
 	formData := FormData{}
 	for i := 0; i < 10; i++ {
-		cursor, err :=threadsdb.Aggregate(context.Background(), mongo.Pipeline{
+		cursor, err := threadsdb.Aggregate(context.Background(), mongo.Pipeline{
 			bson.D{
 				{Key: "$match", Value: bson.D{
 					{Key: "PostTime", Value: bson.D{
@@ -164,7 +164,6 @@ func getForumData() FormData {
 		exclude = append(exclude, m[0]["_id"].(string))
 		formData.Top = append(formData.Top, getThread(m[0]["_id"].(string)))
 	}
-	fmt.Println(exclude)
 	return formData
 }
 
@@ -283,54 +282,33 @@ func containsVotes(filter bson.D) bool {
 
 
 func containsVote(username string, post string, isThread bool) bool {
-	votes := getVotes(username)
-	var ok bool
-	if isThread {
-		_, ok = votes.ThreadVotes[post]
-	} else {
-		_, ok = votes.CommentVotes[post]
-	}
-	return ok
+	//return containsVotes(bson.D{{Key: "Username", Value: username}, {Key: "Votes.$.Post", Value: post}, {Key: "Votes.$.IsThread", Value: isThread}})
+	return getVote(username, post, isThread) != Vote{}
 }
 
 func getVote(username string, post string, isThread bool) Vote {
-	votes := getVotes(username)
-	if isThread {
-		return Vote{post, isThread, votes.ThreadVotes[post]}
-	} else {
-		return Vote{post, isThread, votes.CommentVotes[post]}
+	votes := getVotes(username).Votes
+	for i := 0; i < len(votes); i++ {
+		vote := votes[i]
+		if vote.IsThread == isThread && vote.Post == post {
+			return vote
+		}
 	}
-	
+	return Vote{}
 }
 
 func writeVote(username string, post string, isThread bool, vote int) {
-	if isThread {
-		updateVotes(bson.D{{Key: "Username", Value: username}}, bson.D{{Key: "$push", Value: bson.E{Key: "ThreadVotes", Value: bson.M{post:vote}}}})
-	} else {
-		updateVotes(bson.D{{Key: "Username", Value: username}}, bson.D{{Key: "$push", Value: bson.E{Key: "CommentVotes", Value: bson.M{post:vote}}}})
-	}
+	updateVotes(bson.D{{Key: "Username", Value: username}}, bson.D{{Key: "$push", Value: bson.D{{Key: "Votes", Value: Vote{post, isThread, vote,}}}}})
 }
 
 func updateVote(username string, post string, isThread bool, vote int) {
-	if isThread {
-		updateVotes(bson.D{{Key: "Username", Value: username}}, bson.D{{Key: "$set", Value: bson.E{Key: "ThreadVotes", Value: bson.M{post:vote}}}})
-	} else {
-		updateVotes(bson.D{{Key: "Username", Value: username}}, bson.D{{Key: "$set", Value: bson.E{Key: "CommentVotes", Value: bson.M{post:vote}}}})
-	}
+	updateVotes(bson.D{{Key: "Username", Value: username}, {Key: "Votes.Post", Value: post}}, bson.D{{Key: "$set", Value: bson.D{{Key: "Votes.$.Vote", Value: vote}}}})
 }
 
 func removeVote(username string, post string, isThread bool) {
-	if isThread {
-		updateVotes(bson.D{{Key: "Username", Value: username}}, bson.D{{Key: "$pull", Value: bson.E{Key: "ThreadVotes", Value: post}}})
-	} else {
-		updateVotes(bson.D{{Key: "Username", Value: username}}, bson.D{{Key: "$pull", Value: bson.E{Key: "CommentVotes", Value: post}}})
-	}
+	updateVotes(bson.D{{Key: "Username", Value: username}}, bson.D{{Key: "$pull", Value: bson.D{{Key: "Votes", Value: bson.D{{Key: "IsThread", Value: isThread}, {Key: "Post", Value: post}}}}}})
 }
 
 func readVote(username string, post string, isThread bool) int {
-	if isThread {
-		return readVotes(bson.D{{Key: "Username", Value: username}}).ThreadVotes[post]
-	} else {
-		return readVotes(bson.D{{Key: "Username", Value: username}}).CommentVotes[post]
-	}
+	return getVote(username, post, isThread).Vote
 }

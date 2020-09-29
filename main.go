@@ -177,6 +177,7 @@ func main() {
 	mux.HandleFunc("/thread/", forumThread)
 	mux.HandleFunc("/createthread/", createThread)
 	mux.HandleFunc("/forum/vote/", vote)
+	mux.HandleFunc("/forum/comment/", createComment)
 
 	mux.HandleFunc("/test", test)
 	mux.HandleFunc("/test2", test2)
