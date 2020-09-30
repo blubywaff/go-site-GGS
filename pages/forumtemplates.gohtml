@@ -5,13 +5,14 @@
 <p>{{.Content}}</p>
 <p><a href="/forum/comment/?comment={{.ID}}">Comment</a></p>
 {{range .Replies}}
-<div style="margin-left: 10px">{{template "comment" .}}</div>
+<div style="margin-left: 20px">{{template "comment" .}}</div>
 {{end}}
 {{end}}
 
 {{define "thread"}}
 <p>{{.Poster}} --- {{.PostTime}}</p>
-<h1><p><a href="/forum/vote/?thread={{.ID}}&vote=1">++</a><a href="/forum/vote/?thread={{.ID}}&vote=-1">--</a></p>{{.Score}} | {{.Title}}</h1>
+<p><a href="/forum/vote/?thread={{.ID}}&vote=1">++</a><a href="/forum/vote/?thread={{.ID}}&vote=-1">--</a></p>
+<h1>{{.Score}} | {{.Title}}</h1>
 <p>{{.Body}}</p>
 <P><a href="/forum/comment/?thread={{.ID}}">Comment</a></P>
 {{range .Replies}}

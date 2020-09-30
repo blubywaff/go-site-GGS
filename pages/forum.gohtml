@@ -2,6 +2,7 @@
 <html>
 {{template "globalhead" "Forum"}}
 <body>
+    <p><a href="/createthread/">Create a Post</a></p>
     {{if .Top}}
     {{range $t := .Top}}
     {{template "threadwidget" $t}}

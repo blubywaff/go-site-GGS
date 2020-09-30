@@ -23,7 +23,6 @@ func forumThread(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "Invalid Thread ID", http.StatusBadRequest)
 		return
 	}
-
 	tpls.ExecuteTemplate(w, "thread.gohtml", getThread(threadID).getFull())
 }
 
@@ -39,8 +38,9 @@ func createThread(w http.ResponseWriter, req *http.Request) {
 		id := uuid.New()
 
 		writeThread(Thread{getUser(w, req).Username, title, time.Now(), id.String(), body, 0, []string{}})
+		http.Redirect(w, req, "/thread/?thread=" + id.String(), http.StatusSeeOther)
+		return
 	}
-
 	tpls.ExecuteTemplate(w, "createthread.gohtml", nil)
 }
 
@@ -91,6 +91,7 @@ func vote(w http.ResponseWriter, req *http.Request) {
 		writeVote(username, id, okthread, vote)
 		voteOn(id, okthread, vote)
 	}
+	http.Redirect(w, req, "/thread/?thread=" + id, http.StatusSeeOther)
 }
 
 func voteOn(id string, isThread bool, vote int) {
@@ -126,6 +127,8 @@ func createComment(w http.ResponseWriter, req *http.Request) {
 
 		writeComment(Comment{username, content, time.Now(), 0, []string{}, uuid})
 		addComment(id, okthread, uuid)
+		http.Redirect(w, req, "/forum/" + id, http.StatusSeeOther)
+		return
 	}
 	tpls.ExecuteTemplate(w, "createcomment.gohtml", nil)
 }
