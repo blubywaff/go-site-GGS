@@ -23,6 +23,11 @@ func forumThread(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "Invalid Thread ID", http.StatusBadRequest)
 		return
 	}
+
+	if !containsThread(bson.D{{Key: "ID", Value: threadID}}) {
+		http.Redirect(w, req, "/forum/", http.StatusSeeOther)
+	}
+
 	tpls.ExecuteTemplate(w, "thread.gohtml", getThread(threadID).getFull())
 }
 
@@ -83,6 +88,7 @@ func vote(w http.ResponseWriter, req *http.Request) {
 		if getVote(username, id, okthread).Vote == vote {
 			removeVote(username, id, okthread)
 			voteOn(id, okthread, -vote)
+			http.Redirect(w, req, "/thread/?thread=" + id, http.StatusSeeOther)
 			return
 		}
 		updateVote(username, id, okthread, vote)
