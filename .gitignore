@@ -4,3 +4,4 @@ go-site-GGS
 TLS/*
 !TLS/readme.md
 *.pem
+.idea/
