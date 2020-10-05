@@ -1,18 +1,18 @@
 package main
 
 import (
-	"html/template"
-	"log"
-	"net/http"
-	"time"
+	"context"
 	"fmt"
-	"strings"
-	"os"
-	"io"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/bson"
-	"context"
+	"html/template"
+	"io"
+	"log"
+	"net/http"
+	"os"
+	"strings"
+	"time"
 )
 
 var tpls *template.Template
@@ -87,7 +87,7 @@ func sessionCookie(w http.ResponseWriter, req *http.Request) {
 
 func site(w http.ResponseWriter, req *http.Request) {
 	//sessionCookie(w, req)
-	http.ServeFile(w, req, "site/" + req.URL.Path)
+	http.ServeFile(w, req, "site/"+req.URL.Path)
 }
 
 func sUp(h http.HandlerFunc) http.HandlerFunc {
@@ -116,7 +116,7 @@ func proofos(w http.ResponseWriter, req *http.Request) {
 		tpls.ExecuteTemplate(w, "proofofskills.gohtml", nil)
 		return
 	}
-	http.ServeFile(w, req, "site/" + req.URL.Path[9:])
+	http.ServeFile(w, req, "site/"+req.URL.Path[9:])
 }
 
 func fileHandle(w http.ResponseWriter, req *http.Request) {
@@ -147,16 +147,17 @@ func main() {
 	threadsdb = client.Database("forumdb").Collection("threads")
 	commentsdb = client.Database("forumdb").Collection("comments")
 	votesdb = client.Database("forumdb").Collection("votes")
-	
+
+	playersdb = client.Database("gamedb").Collection("players")
+
 	timer := time.AfterFunc(time.Second, cleaner)
 	defer timer.Stop()
 
 	mux := http.NewServeMux()
 	fileMux := http.NewServeMux()
 
-	fileMux.HandleFunc("/",  fileHandle)
+	fileMux.HandleFunc("/", fileHandle)
 
-	
 	//http.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("./site"))))
 	//mux.HandleFunc("/", site)
 	mux.HandleFunc("/", sendHome)
@@ -185,7 +186,7 @@ func main() {
 	mux.HandleFunc("/ping/", ping)
 	mux.HandleFunc("/log/", getLog)
 
-	handlerfunc := http.HandlerFunc(func (w http.ResponseWriter, req *http.Request) {
+	handlerfunc := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		//fmt.Println(req.URL.Path)
 		c, err := req.Cookie("session")
 		//fmt.Println("cerr", err)
