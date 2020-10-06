@@ -179,6 +179,10 @@ func main() {
 	mux.HandleFunc("/createthread/", createThread)
 	mux.HandleFunc("/forum/vote/", vote)
 	mux.HandleFunc("/forum/comment/", createComment)
+	mux.HandleFunc("/webgame/", webgame)
+	mux.HandleFunc("/webgame/start", gamestart)
+	mux.HandleFunc("/webgame/training", training)
+	mux.HandleFunc("/webgame/details", gamedetails)
 
 	mux.HandleFunc("/test", test)
 	mux.HandleFunc("/test2", test2)

@@ -38,3 +38,7 @@ func gamestart(w http.ResponseWriter, req *http.Request) {
 	// TODO create db entry for new base
 	tpls.ExecuteTemplate(w, "gamestart.gohtml", nil)
 }
+
+func gamedetails(w http.ResponseWriter, req *http.Request) {
+	tpls.ExecuteTemplate(w, "gamedetails.gohtml", nil)
+}
