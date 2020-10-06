@@ -8,6 +8,7 @@ import (
 func webgame(w http.ResponseWriter, req *http.Request) {
 	if !alreadyLoggedIn(w, req) {
 		http.Redirect(w, req, "/login/", http.StatusSeeOther)
+		return
 	}
 	username := getUser(w, req)
 	if !containsPlayer(bson.D{{"Username", username}, {"IsTraining", true}}) {
@@ -26,6 +27,7 @@ func webgame(w http.ResponseWriter, req *http.Request) {
 func training(w http.ResponseWriter, req *http.Request) {
 	if !alreadyLoggedIn(w, req) {
 		http.Redirect(w, req, "/login/", http.StatusSeeOther)
+		return
 	}
 	// TODO add code to create db entry for training
 	tpls.ExecuteTemplate(w, "trainingground.gohtml", nil)
@@ -34,6 +36,7 @@ func training(w http.ResponseWriter, req *http.Request) {
 func gamestart(w http.ResponseWriter, req *http.Request) {
 	if !alreadyLoggedIn(w, req) {
 		http.Redirect(w, req, "/login/", http.StatusSeeOther)
+		return
 	}
 	// TODO create db entry for new base
 	tpls.ExecuteTemplate(w, "gamestart.gohtml", nil)
