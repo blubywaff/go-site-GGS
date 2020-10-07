@@ -1,11 +1,11 @@
 package main
 
 import (
-	"net/http"
 	"github.com/google/uuid"
-	"time"
-	"strconv"
 	"go.mongodb.org/mongo-driver/bson"
+	"net/http"
+	"strconv"
+	"time"
 )
 
 func forum(w http.ResponseWriter, req *http.Request) {
@@ -18,7 +18,7 @@ func forumThread(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "No Thread ID", http.StatusBadRequest)
 	}
 	threadID := threadIDQ[0]
-	
+
 	if len(threadID) < 36 {
 		http.Error(w, "Invalid Thread ID", http.StatusBadRequest)
 		return
@@ -43,7 +43,7 @@ func createThread(w http.ResponseWriter, req *http.Request) {
 		id := uuid.New()
 
 		writeThread(Thread{getUser(w, req).Username, title, time.Now(), id.String(), body, 0, []string{}})
-		http.Redirect(w, req, "/thread/?thread=" + id.String(), http.StatusSeeOther)
+		http.Redirect(w, req, "/thread/?thread="+id.String(), http.StatusSeeOther)
 		return
 	}
 	tpls.ExecuteTemplate(w, "createthread.gohtml", nil)
@@ -88,23 +88,23 @@ func vote(w http.ResponseWriter, req *http.Request) {
 		if getVote(username, id, okthread).Vote == vote {
 			removeVote(username, id, okthread)
 			voteOn(id, okthread, -vote)
-			http.Redirect(w, req, "/thread/?thread=" + id, http.StatusSeeOther)
+			http.Redirect(w, req, "/thread/?thread="+id, http.StatusSeeOther)
 			return
 		}
 		updateVote(username, id, okthread, vote)
-		voteOn(id, okthread, 2 * vote)
+		voteOn(id, okthread, 2*vote)
 	} else {
 		writeVote(username, id, okthread, vote)
 		voteOn(id, okthread, vote)
 	}
-	http.Redirect(w, req, "/thread/?thread=" + id, http.StatusSeeOther)
+	http.Redirect(w, req, "/thread/?thread="+id, http.StatusSeeOther)
 }
 
 func voteOn(id string, isThread bool, vote int) {
 	if isThread {
-		updateThread(bson.D{{Key: "ID", Value: id}}, bson.D{{Key: "$set", Value: bson.D{{Key: "Score", Value: readThread(bson.D{{Key: "ID", Value: id}}).Score + vote}}}})
+		updateThread(bson.D{{Key: "ID", Value: id}}, bson.D{{Key: "$inc", Value: bson.D{{Key: "Score", Value: vote}}}})
 	} else {
-		updateComment(bson.D{{Key: "ID", Value: id}}, bson.D{{Key: "$set", Value: bson.D{{Key: "Score", Value: readComment(bson.D{{Key: "ID", Value: id}}).Score + vote}}}})
+		updateComment(bson.D{{Key: "ID", Value: id}}, bson.D{{Key: "$inc", Value: bson.D{{Key: "Score", Value: vote}}}})
 	}
 }
 
@@ -133,7 +133,7 @@ func createComment(w http.ResponseWriter, req *http.Request) {
 
 		writeComment(Comment{username, content, time.Now(), 0, []string{}, uuid})
 		addComment(id, okthread, uuid)
-		http.Redirect(w, req, "/forum/" + id, http.StatusSeeOther)
+		http.Redirect(w, req, "/forum/"+id, http.StatusSeeOther)
 		return
 	}
 	tpls.ExecuteTemplate(w, "createcomment.gohtml", nil)
