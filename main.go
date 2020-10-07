@@ -19,11 +19,15 @@ var tpls *template.Template
 
 var badChars map[string]string
 
+var ctx context.Context
+
 func getTime() string {
 	return time.Now().Format("01/02/2006 at 15:04:05 in timezone: MST -0700")
 }
 
 func init() {
+	ctx = context.Background()
+
 	fm := template.FuncMap{
 		"time": getTime,
 	}
@@ -135,7 +139,7 @@ func getLog(w http.ResponseWriter, req *http.Request) {
 func main() {
 	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
 	check(err)
-	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 20*time.Second)
 	defer cancel()
 	err = client.Connect(ctx)
 	check(err)

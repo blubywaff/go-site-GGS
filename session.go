@@ -1,20 +1,19 @@
 package main
 
 import (
-	"net/http"
-	"golang.org/x/crypto/bcrypt"
-	"github.com/google/uuid"
-	"time"
-	"go.mongodb.org/mongo-driver/bson"
-	"context"
-	"fmt"
-	"io/ioutil"
 	"bytes"
-	"strings"
+	"fmt"
+	"github.com/google/uuid"
+	"github.com/nfnt/resize"
+	"go.mongodb.org/mongo-driver/bson"
+	"golang.org/x/crypto/bcrypt"
 	"image"
 	"image/jpeg"
 	"image/png"
-	"github.com/nfnt/resize"
+	"io/ioutil"
+	"net/http"
+	"strings"
+	"time"
 )
 
 var dbSessionsCleaned time.Time
@@ -24,12 +23,12 @@ const sessionLength int = 1800
 func test(w http.ResponseWriter, req *http.Request) {
 	c, err := req.Cookie("test")
 	if err == nil {
-		http.SetCookie(w, &http.Cookie{Name: "test", Value: c.Value, MaxAge: 60,})
+		http.SetCookie(w, &http.Cookie{Name: "test", Value: c.Value, MaxAge: 60})
 	}
 	//fmt.Println(c, err)
 	if req.Method == http.MethodPost {
 		//fmt.Println(req.FormValue("username"))
-		http.SetCookie(w, &http.Cookie{Name: "test", Value: "00000000-0000-0000-0000-000000000000", MaxAge: 60,})
+		http.SetCookie(w, &http.Cookie{Name: "test", Value: "00000000-0000-0000-0000-000000000000", MaxAge: 60})
 		http.Redirect(w, req, "/test2", http.StatusSeeOther)
 	}
 	tpls.ExecuteTemplate(w, "login.gohtml", nil)
@@ -146,10 +145,10 @@ func logout(w http.ResponseWriter, req *http.Request) {
 }
 
 func cleanSessions() {
-	cur, err := sessionsdb.Find(context.Background(), bson.D{})
+	cur, err := sessionsdb.Find(ctx, bson.D{})
 	check(err)
-	defer cur.Close(context.Background())
-	for cur.Next(context.Background()) {
+	defer cur.Close(ctx)
+	for cur.Next(ctx) {
 		session := session{}
 		err := cur.Decode(&session)
 		check(err)
@@ -198,7 +197,7 @@ func account(w http.ResponseWriter, req *http.Request) {
 		f, finfo, err := req.FormFile("file")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return 
+			return
 		}
 		defer f.Close()
 
@@ -223,7 +222,6 @@ func account(w http.ResponseWriter, req *http.Request) {
 		} else {
 			updateProfilePicture(username, bs)
 		}
-		
 
 	}
 
@@ -248,7 +246,7 @@ func profilePicture(w http.ResponseWriter, req *http.Request) {
 
 func processImage(bs []byte, name string) ([]byte, error) {
 	pngbs := bs
-	if(strings.HasSuffix(name, ".jpg")) {
+	if strings.HasSuffix(name, ".jpg") {
 		decoded, err := jpeg.Decode(bytes.NewReader(bs))
 		if !check(err) {
 			return nil, err

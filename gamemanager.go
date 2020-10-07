@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -44,41 +43,41 @@ func getBase(username string) Base {
 }
 
 func aggregatePlayersdb(pipeline mongo.Pipeline) []bson.M {
-	cursor, err := playersdb.Aggregate(context.Background(), pipeline)
+	cursor, err := playersdb.Aggregate(ctx, pipeline)
 	if !check(err) {
 		return []bson.M{}
 	}
 	var m []bson.M
-	err = cursor.All(context.Background(), &m)
+	err = cursor.All(ctx, &m)
 	check(err)
 	return m
 }
 
 func readPlayer(filter bson.D) Player {
 	player := Player{}
-	err := playersdb.FindOne(context.Background(), filter).Decode(&player)
+	err := playersdb.FindOne(ctx, filter).Decode(&player)
 	check(err)
 	return player
 }
 
 func writePlayer(player Player) {
-	_, err := playersdb.InsertOne(context.Background(), player)
+	_, err := playersdb.InsertOne(ctx, player)
 	check(err)
 }
 
 func removePlayer(filter bson.D) {
-	res := playersdb.FindOneAndDelete(context.Background(), filter)
+	res := playersdb.FindOneAndDelete(ctx, filter)
 	check(res.Err())
 }
 
 func updatePlayer(filter bson.D, update bson.D) {
-	_, err := playersdb.UpdateOne(context.Background(), filter, update)
+	_, err := playersdb.UpdateOne(ctx, filter, update)
 	check(err)
 }
 
 func containsPlayer(filter bson.D) bool {
 	player := Player{}
-	err := playersdb.FindOne(context.Background(), filter).Decode(&player)
+	err := playersdb.FindOne(ctx, filter).Decode(&player)
 	check(err)
 	return err == nil
 }

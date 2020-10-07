@@ -1,10 +1,10 @@
 package main
 
 import (
-	"time"
-	"go.mongodb.org/mongo-driver/mongo"
+	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
-	"context"
+	"go.mongodb.org/mongo-driver/mongo"
+	"time"
 )
 
 var threadsdb *mongo.Collection
@@ -12,13 +12,13 @@ var commentsdb *mongo.Collection
 var votesdb *mongo.Collection
 
 type Thread struct {
-	Poster string `bson:"Poster"`
-	Title string `bson:"Title"`
+	Poster   string    `bson:"Poster"`
+	Title    string    `bson:"Title"`
 	PostTime time.Time `bson:"PostTime"`
-	ID string `bson:"ID"`
-	Body string `bson:"Body"`
-	Score int `bson:"Score"`
-	Replies []string `bson:"Replies"`
+	ID       string    `bson:"ID"`
+	Body     string    `bson:"Body"`
+	Score    int       `bson:"Score"`
+	Replies  []string  `bson:"Replies"`
 }
 
 /*type ThreadInfo struct {
@@ -30,31 +30,31 @@ type Thread struct {
 }*/
 
 type Comment struct {
-	Poster string `bson:"Poster"`
-	Content string `bson:"Content"`
+	Poster   string    `bson:"Poster"`
+	Content  string    `bson:"Content"`
 	PostTime time.Time `bson:"PostTime"`
-	Score int `bson:"Score"`
-	Replies []string `bson:"Replies"`
-	ID string `bson:"ID"`
+	Score    int       `bson:"Score"`
+	Replies  []string  `bson:"Replies"`
+	ID       string    `bson:"ID"`
 }
 
 type FullThread struct {
-	Poster string 
-	Title string 
-	PostTime time.Time 
-	ID string 
-	Body string 
-	Score int 
-	Replies []FullComment
+	Poster   string
+	Title    string
+	PostTime time.Time
+	ID       string
+	Body     string
+	Score    int
+	Replies  []FullComment
 }
 
 type FullComment struct {
-	Poster string 
-	Content string 
-	PostTime time.Time 
-	Score int 
-	Replies []FullComment
-	ID string
+	Poster   string
+	Content  string
+	PostTime time.Time
+	Score    int
+	Replies  []FullComment
+	ID       string
 }
 
 func (thread Thread) getFull() FullThread {
@@ -97,25 +97,25 @@ type FormData struct {
 }
 
 type Vote struct {
-	Post string `bson:"Post"`
-	IsThread bool `bson:"IsThread"`
-	Vote int `bson:"Vote"`
+	Post     string `bson:"Post"`
+	IsThread bool   `bson:"IsThread"`
+	Vote     int    `bson:"Vote"`
 }
 
 type Votes struct {
 	Username string `bson:"Username"`
-	Votes []Vote `bson:"Votes"`
+	Votes    []Vote `bson:"Votes"`
 }
 
 /*
-	cursor, err :=threadsdb.Aggregate(context.Background(), mongo.Pipeline{
+	cursor, err :=threadsdb.Aggregate(ctx, mongo.Pipeline{
 		bson.D{
 			{"$match", bson.D{
 				{"PostTime", bson.D{
 					{"$gte", time.Now().Add(time.Hour * -24)},
 				}},
 			}},
-			
+
 		},
 		bson.D{
 			{"$group", bson.D{
@@ -126,13 +126,13 @@ type Votes struct {
 			}},
 		},
 	})
-	*/
+*/
 
 func getForumData() FormData {
 	exclude := bson.A{}
 	formData := FormData{}
 	for i := 0; i < 10; i++ {
-		cursor, err := threadsdb.Aggregate(context.Background(), mongo.Pipeline{
+		cursor, err := threadsdb.Aggregate(ctx, mongo.Pipeline{
 			bson.D{
 				{Key: "$match", Value: bson.D{
 					{Key: "PostTime", Value: bson.D{
@@ -156,7 +156,7 @@ func getForumData() FormData {
 			break
 		}
 		var m []bson.M
-		err = cursor.All(context.Background(), &m)
+		err = cursor.All(ctx, &m)
 		check(err)
 		if len(m) < 1 {
 			break
@@ -169,117 +169,111 @@ func getForumData() FormData {
 
 func getThread(id string) Thread {
 	thread := Thread{}
-	err := threadsdb.FindOne(context.Background(), bson.D{{Key: "ID", Value: id}}).Decode(&thread)
+	err := threadsdb.FindOne(ctx, bson.D{{Key: "ID", Value: id}}).Decode(&thread)
 	check(err)
 	return thread
 }
 
 func readThread(filter bson.D) Thread {
 	thread := Thread{}
-	err := threadsdb.FindOne(context.Background(), filter).Decode(&thread)
+	err := threadsdb.FindOne(ctx, filter).Decode(&thread)
 	check(err)
 	return thread
 }
 
 func writeThread(thread Thread) {
-	_, err := threadsdb.InsertOne(context.Background(), thread)
+	_, err := threadsdb.InsertOne(ctx, thread)
 	check(err)
 }
 
 func removeThread(filter bson.D) {
-	res := threadsdb.FindOneAndDelete(context.Background(), filter)
+	res := threadsdb.FindOneAndDelete(ctx, filter)
 	check(res.Err())
 }
 
 func updateThread(filter bson.D, update bson.D) {
-	_, err := threadsdb.UpdateOne(context.Background(), filter, update)
+	_, err := threadsdb.UpdateOne(ctx, filter, update)
 	check(err)
 }
 
 func containsThread(filter bson.D) bool {
 	thread := Thread{}
-	err := threadsdb.FindOne(context.Background(), filter).Decode(&thread)
+	err := threadsdb.FindOne(ctx, filter).Decode(&thread)
 	check(err)
 	return err == nil
 }
 
-
-
 func getComment(id string) Comment {
 	comment := Comment{}
-	err := commentsdb.FindOne(context.Background(), bson.D{{Key: "ID", Value: id}}).Decode(&comment)
+	err := commentsdb.FindOne(ctx, bson.D{{Key: "ID", Value: id}}).Decode(&comment)
 	check(err)
 	return comment
 }
 
 func readComment(filter bson.D) Comment {
 	comment := Comment{}
-	err := commentsdb.FindOne(context.Background(), filter).Decode(&comment)
+	err := commentsdb.FindOne(ctx, filter).Decode(&comment)
 	check(err)
 	return comment
 }
 
 func writeComment(comment Comment) {
-	_, err := commentsdb.InsertOne(context.Background(), comment)
+	_, err := commentsdb.InsertOne(ctx, comment)
 	check(err)
 }
 
 func removeComment(filter bson.D) {
-	res := commentsdb.FindOneAndDelete(context.Background(), filter)
+	res := commentsdb.FindOneAndDelete(ctx, filter)
 	check(res.Err())
 }
 
 func updateComment(filter bson.D, update bson.D) {
-	_, err := commentsdb.UpdateOne(context.Background(), filter, update)
+	_, err := commentsdb.UpdateOne(ctx, filter, update)
 	check(err)
 }
 
 func containsComment(filter bson.D) bool {
 	comment := Comment{}
-	err := commentsdb.FindOne(context.Background(), filter).Decode(&comment)
+	err := commentsdb.FindOne(ctx, filter).Decode(&comment)
 	check(err)
 	return err == nil
 }
 
-
-
 func getVotes(username string) Votes {
 	votes := Votes{}
-	err := votesdb.FindOne(context.Background(), bson.D{{Key: "Username", Value: username}}).Decode(&votes)
+	err := votesdb.FindOne(ctx, bson.D{{Key: "Username", Value: username}}).Decode(&votes)
 	check(err)
 	return votes
 }
 
 func readVotes(filter bson.D) Votes {
 	votes := Votes{}
-	err := votesdb.FindOne(context.Background(), filter).Decode(&votes)
+	err := votesdb.FindOne(ctx, filter).Decode(&votes)
 	check(err)
 	return votes
 }
 
 func writeVotes(votes Votes) {
-	_, err := votesdb.InsertOne(context.Background(), votes)
+	_, err := votesdb.InsertOne(ctx, votes)
 	check(err)
 }
 
 func removeVotes(filter bson.D) {
-	res := votesdb.FindOneAndDelete(context.Background(), filter)
+	res := votesdb.FindOneAndDelete(ctx, filter)
 	check(res.Err())
 }
 
 func updateVotes(filter bson.D, update bson.D) {
-	_, err := votesdb.UpdateOne(context.Background(), filter, update)
+	_, err := votesdb.UpdateOne(ctx, filter, update)
 	check(err)
 }
 
 func containsVotes(filter bson.D) bool {
 	votes := Votes{}
-	err := votesdb.FindOne(context.Background(), filter).Decode(&votes)
+	err := votesdb.FindOne(ctx, filter).Decode(&votes)
 	check(err)
 	return err == nil
 }
-
-
 
 func containsVote(username string, post string, isThread bool) bool {
 	//return containsVotes(bson.D{{Key: "Username", Value: username}, {Key: "Votes.$.Post", Value: post}, {Key: "Votes.$.IsThread", Value: isThread}})
@@ -287,18 +281,52 @@ func containsVote(username string, post string, isThread bool) bool {
 }
 
 func getVote(username string, post string, isThread bool) Vote {
-	votes := getVotes(username).Votes
-	for i := 0; i < len(votes); i++ {
-		vote := votes[i]
-		if vote.IsThread == isThread && vote.Post == post {
-			return vote
-		}
+	cursor, err := votesdb.Aggregate(ctx, mongo.Pipeline{
+		bson.D{
+			{"$match", bson.D{
+				{"Username", username},
+				{"Votes.Post", post},
+				{"Votes.IsThread", isThread},
+			}},
+		},
+		bson.D{
+			{Key: "$project", Value: bson.D{
+				{"_id", false},
+				{"Username", false},
+			}},
+		},
+		bson.D{
+			{"$unwind", bson.D{
+				{"path", "$Votes"},
+			}},
+		},
+		bson.D{
+			{"$match", bson.D{
+				{"Votes.IsThread", isThread},
+				{"Votes.Post", post},
+			}},
+		},
+	})
+	if !check(err) {
+		return Vote{}
 	}
-	return Vote{}
+	var m []bson.M
+	err = cursor.All(ctx, &m)
+	fmt.Println(m)
+	if !check(err) {
+		return Vote{}
+	}
+	if len(m) < 1 {
+		fmt.Println("no vote")
+		return Vote{}
+	}
+	fmt.Println(m[0]["Votes"].(bson.M)["IsThread"])
+	mVote := m[0]["Votes"].(bson.M)
+	return Vote{mVote["Post"].(string), mVote["IsThread"].(bool), int(mVote["Vote"].(int32))}
 }
 
 func writeVote(username string, post string, isThread bool, vote int) {
-	updateVotes(bson.D{{Key: "Username", Value: username}}, bson.D{{Key: "$push", Value: bson.D{{Key: "Votes", Value: Vote{post, isThread, vote,}}}}})
+	updateVotes(bson.D{{Key: "Username", Value: username}}, bson.D{{Key: "$push", Value: bson.D{{Key: "Votes", Value: Vote{post, isThread, vote}}}}})
 }
 
 func updateVote(username string, post string, isThread bool, vote int) {
