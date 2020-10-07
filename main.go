@@ -28,7 +28,7 @@ func init() {
 		"time": getTime,
 	}
 
-	tpls = template.Must(template.New("").Funcs(fm).ParseGlob("templates/*.gohtml"))
+	tpls = template.Must(template.New("").Funcs(fm).ParseGlob("templates/*.gotpls"))
 	tpls.ParseGlob("pages/*.gohtml")
 
 	badChars = map[string]string{
@@ -180,9 +180,9 @@ func main() {
 	mux.HandleFunc("/forum/vote/", vote)
 	mux.HandleFunc("/forum/comment/", createComment)
 	mux.HandleFunc("/webgame/", webgame)
-	mux.HandleFunc("/webgame/start", gamestart)
-	mux.HandleFunc("/webgame/training", training)
-	mux.HandleFunc("/webgame/details", gamedetails)
+	mux.HandleFunc("/webgame/start/", gamestart)
+	mux.HandleFunc("/webgame/training/", training)
+	mux.HandleFunc("/webgame/details/", gamedetails)
 
 	mux.HandleFunc("/test", test)
 	mux.HandleFunc("/test2", test2)

@@ -9,27 +9,26 @@ import (
 var playersdb *mongo.Collection
 
 type Player struct {
-	IsTraining bool
-	Username   string
-	Ships      []Ship
-	Base       Base
+	IsTraining bool   `bson:"IsTraining"`
+	Username   string `bson:"Username"`
+	Ships      []Ship `bson:"Ships"`
+	Base       Base   `bson:"Base"`
 }
 
 type Base struct {
-	ID       string
-	Strength int
-	Power    int
-	Water    int
-	Metal    int
-	Fuel     int
+	Strength int `bson:"Strength"`
+	Power    int `bson:"Power"`
+	Water    int `bson:"Water"`
+	Metal    int `bson:"Metal"`
+	Fuel     int `bson:"Fuel"`
 }
 
 type Ship struct {
-	Type     string
-	IsMain   bool
-	Strength int
-	Defense  int
-	Crew     int
+	Type     string `bson:"Type"`
+	IsMain   bool   `bson:"IsMain"`
+	Strength int    `bson:"Strength"`
+	Defense  int    `bson:"Defense"`
+	Crew     int    `bson:"Crew"`
 }
 
 func getPlayer(username string) Player {
@@ -42,6 +41,17 @@ func getShips(username string) []Ship {
 
 func getBase(username string) Base {
 	return getPlayer(username).Base
+}
+
+func aggregatePlayersdb(pipeline mongo.Pipeline) []bson.M {
+	cursor, err := playersdb.Aggregate(context.Background(), pipeline)
+	if !check(err) {
+		return []bson.M{}
+	}
+	var m []bson.M
+	err = cursor.All(context.Background(), &m)
+	check(err)
+	return m
 }
 
 func readPlayer(filter bson.D) Player {
