@@ -107,64 +107,40 @@ type Votes struct {
 	Votes    []Vote `bson:"Votes"`
 }
 
-/*
-	cursor, err :=threadsdb.Aggregate(ctx, mongo.Pipeline{
+func getForumData() FormData {
+	cursor, err := threadsdb.Aggregate(ctx, mongo.Pipeline{
 		bson.D{
 			{"$match", bson.D{
 				{"PostTime", bson.D{
 					{"$gte", time.Now().Add(time.Hour * -24)},
 				}},
 			}},
-
 		},
 		bson.D{
-			{"$group", bson.D{
-				{"_id", "ID"},
-				{"score", bson.D{
-					{"$max", "$Score"},
-				}},
+			{"$sort", bson.D{
+				{"Score", -1},
 			}},
 		},
+		bson.D{
+			{"$limit", 10},
+		},
 	})
-*/
-
-func getForumData() FormData {
-	exclude := bson.A{}
-	formData := FormData{}
-	for i := 0; i < 10; i++ {
-		cursor, err := threadsdb.Aggregate(ctx, mongo.Pipeline{
-			bson.D{
-				{Key: "$match", Value: bson.D{
-					{Key: "PostTime", Value: bson.D{
-						{Key: "$gte", Value: time.Now().Add(time.Hour * -24)},
-					}},
-					{Key: "ID", Value: bson.D{
-						{Key: "$nin", Value: exclude},
-					}},
-				}},
-			},
-			bson.D{
-				{Key: "$group", Value: bson.D{
-					{Key: "_id", Value: "$ID"},
-					{Key: "score", Value: bson.D{
-						{Key: "$max", Value: "$Score"},
-					}},
-				}},
-			},
-		})
-		if !check(err) {
-			break
-		}
-		var m []bson.M
-		err = cursor.All(ctx, &m)
-		check(err)
-		if len(m) < 1 {
-			break
-		}
-		exclude = append(exclude, m[0]["_id"].(string))
-		formData.Top = append(formData.Top, getThread(m[0]["_id"].(string)))
+	if !check(err) {
+		return FormData{}
 	}
-	return formData
+	var m []bson.M
+	err = cursor.All(ctx, &m)
+	if !check(err) {
+		return FormData{}
+	}
+	var result FormData
+	for _, bm := range m {
+		var t Thread
+		bb, _ := bson.Marshal(bm)
+		_ = bson.Unmarshal(bb, &t)
+		result.Top = append(result.Top, t)
+	}
+	return result
 }
 
 func getThread(id string) Thread {
