@@ -149,7 +149,6 @@ func main() {
 	profilePicturesdb = client.Database("accountdb").Collection("profilepictures")
 
 	threadsdb = client.Database("forumdb").Collection("threads")
-	commentsdb = client.Database("forumdb").Collection("comments")
 	votesdb = client.Database("forumdb").Collection("votes")
 
 	playersdb = client.Database("gamedb").Collection("players")

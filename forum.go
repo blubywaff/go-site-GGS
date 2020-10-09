@@ -28,7 +28,7 @@ func forumThread(w http.ResponseWriter, req *http.Request) {
 		http.Redirect(w, req, "/forum/", http.StatusSeeOther)
 	}
 
-	tpls.ExecuteTemplate(w, "thread.gohtml", getThread(threadID).getFull())
+	tpls.ExecuteTemplate(w, "thread.gohtml", getThread(threadID))
 }
 
 func createThread(w http.ResponseWriter, req *http.Request) {
@@ -42,7 +42,7 @@ func createThread(w http.ResponseWriter, req *http.Request) {
 		body := req.FormValue("body")
 		id := uuid.New()
 
-		writeThread(Thread{getUser(w, req).Username, title, time.Now(), id.String(), body, 0, []string{}})
+		writeThread(Thread{getUser(w, req).Username, title, time.Now(), id.String(), body, 0, []Comment{}})
 		http.Redirect(w, req, "/thread/?thread="+id.String(), http.StatusSeeOther)
 		return
 	}
@@ -100,11 +100,11 @@ func vote(w http.ResponseWriter, req *http.Request) {
 	http.Redirect(w, req, "/thread/?thread="+id, http.StatusSeeOther)
 }
 
-func voteOn(id string, isThread bool, vote int) {
+func voteOn(id, rootId, trueId string, isThread bool, vote int) {
 	if isThread {
 		updateThread(bson.D{{Key: "ID", Value: id}}, bson.D{{Key: "$inc", Value: bson.D{{Key: "Score", Value: vote}}}})
 	} else {
-		updateComment(bson.D{{Key: "ID", Value: id}}, bson.D{{Key: "$inc", Value: bson.D{{Key: "Score", Value: vote}}}})
+		updateComment(id, rootId, trueId, bson.D{{Key: "$inc", Value: bson.D{{Key: "Score", Value: vote}}}})
 	}
 }
 
@@ -131,7 +131,7 @@ func createComment(w http.ResponseWriter, req *http.Request) {
 		}
 		uuid := uuid.New().String()
 
-		writeComment(Comment{username, content, time.Now(), 0, []string{}, uuid})
+		writeComment(Comment{username, content, time.Now(), 0, []Comment{}, uuid})
 		addComment(id, okthread, uuid)
 		http.Redirect(w, req, "/forum/"+id, http.StatusSeeOther)
 		return
@@ -139,10 +139,10 @@ func createComment(w http.ResponseWriter, req *http.Request) {
 	tpls.ExecuteTemplate(w, "createcomment.gohtml", nil)
 }
 
-func addComment(rootid string, rootisthread bool, commentid string) {
+func addComment(rootid string, rootisthread bool, comment Comment) {
 	if rootisthread {
-		updateThread(bson.D{{Key: "ID", Value: rootid}}, bson.D{{Key: "$push", Value: bson.D{{Key: "Replies", Value: commentid}}}})
+		updateThread(bson.D{{Key: "ID", Value: rootid}}, bson.D{{Key: "$push", Value: bson.D{{Key: "Replies", Value: comment}}}})
 	} else {
-		updateComment(bson.D{{Key: "ID", Value: rootid}}, bson.D{{Key: "$push", Value: bson.D{{Key: "Replies", Value: commentid}}}})
+		updateComment(bson.D{{Key: "ID", Value: rootid}}, bson.D{{Key: "$push", Value: bson.D{{Key: "Replies", Value: comment}}}})
 	}
 }

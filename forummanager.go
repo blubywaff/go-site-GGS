@@ -8,7 +8,8 @@ import (
 )
 
 var threadsdb *mongo.Collection
-var commentsdb *mongo.Collection
+
+//var commentsdb *mongo.Collection
 var votesdb *mongo.Collection
 
 type Thread struct {
@@ -18,81 +19,19 @@ type Thread struct {
 	ID       string    `bson:"ID"`
 	Body     string    `bson:"Body"`
 	Score    int       `bson:"Score"`
-	Replies  []string  `bson:"Replies"`
+	Replies  []Comment `bson:"Replies"`
 }
-
-/*type ThreadInfo struct {
-	Poster string `bson:"Poster"`
-	Title string `bson:"Title"`
-	PostTime time.Time `bson:"PostTime"`
-	ID string `bson:"ID"`
-	Score int `bson:"Score"`
-}*/
 
 type Comment struct {
 	Poster   string    `bson:"Poster"`
 	Content  string    `bson:"Content"`
 	PostTime time.Time `bson:"PostTime"`
 	Score    int       `bson:"Score"`
-	Replies  []string  `bson:"Replies"`
+	Replies  []Comment `bson:"Replies"`
 	ID       string    `bson:"ID"`
 }
 
-type FullThread struct {
-	Poster   string
-	Title    string
-	PostTime time.Time
-	ID       string
-	Body     string
-	Score    int
-	Replies  []FullComment
-}
-
-type FullComment struct {
-	Poster   string
-	Content  string
-	PostTime time.Time
-	Score    int
-	Replies  []FullComment
-	ID       string
-}
-
-func (thread Thread) getFull() FullThread {
-	full := FullThread{
-		thread.Poster,
-		thread.Title,
-		thread.PostTime,
-		thread.ID,
-		thread.Body,
-		thread.Score,
-		[]FullComment{},
-	}
-	fulls := []FullComment{}
-	for _, c := range thread.Replies {
-		fulls = append(fulls, getComment(c).getFull())
-	}
-	full.Replies = fulls
-	return full
-}
-
-func (comment Comment) getFull() FullComment {
-	full := FullComment{
-		comment.Poster,
-		comment.Content,
-		comment.PostTime,
-		comment.Score,
-		[]FullComment{},
-		comment.ID,
-	}
-	fulls := []FullComment{}
-	for _, c := range comment.Replies {
-		fulls = append(fulls, getComment(c).getFull())
-	}
-	full.Replies = fulls
-	return full
-}
-
-type FormData struct {
+type ForumData struct {
 	Top []Thread `bson:"Top"`
 }
 
@@ -107,7 +46,7 @@ type Votes struct {
 	Votes    []Vote `bson:"Votes"`
 }
 
-func getForumData() FormData {
+func getForumData() ForumData {
 	cursor, err := threadsdb.Aggregate(ctx, mongo.Pipeline{
 		bson.D{
 			{"$match", bson.D{
@@ -126,14 +65,14 @@ func getForumData() FormData {
 		},
 	})
 	if !check(err) {
-		return FormData{}
+		return ForumData{}
 	}
 	var m []bson.M
 	err = cursor.All(ctx, &m)
 	if !check(err) {
-		return FormData{}
+		return ForumData{}
 	}
-	var result FormData
+	var result ForumData
 	for _, bm := range m {
 		var t Thread
 		bb, _ := bson.Marshal(bm)
@@ -179,40 +118,125 @@ func containsThread(filter bson.D) bool {
 	return err == nil
 }
 
-func getComment(id string) Comment {
-	comment := Comment{}
-	err := commentsdb.FindOne(ctx, bson.D{{Key: "ID", Value: id}}).Decode(&comment)
-	check(err)
-	return comment
+func readComment(id, rootId string) Comment {
+	//TODO Aggregation
+	cursor, err := threadsdb.Aggregate(ctx, mongo.Pipeline{
+		bson.D{
+			{"$match", bson.D{
+				{"ID", rootId},
+			}},
+		},
+		bson.D{
+			{"$redact", bson.D{
+				{"$cond", bson.D{
+					{"if", bson.D{
+						{"ID", id},
+					}},
+					{"then", "$$KEEP"},
+					{"else", "DESCEND"},
+				}},
+			}},
+		},
+	})
+	if !check(err) {
+		return Comment{}
+	}
+	var m []bson.M
+	err = cursor.All(ctx, &m)
+	if !check(err) {
+		return Comment{}
+	}
+	fmt.Println(m)
+	var result Comment
+	bb, _ := bson.Marshal(m[0])
+	_ = bson.Unmarshal(bb, &result)
+	return result
 }
 
-func readComment(filter bson.D) Comment {
-	comment := Comment{}
-	err := commentsdb.FindOne(ctx, filter).Decode(&comment)
+func writeComment(comment Comment, rootId, trueRoot string) {
+	if rootId == trueRoot {
+
+	}
+	_, err := threadsdb.Aggregate(ctx, mongo.Pipeline{
+		bson.D{
+			{"$match", bson.D{
+				{"ID", trueRoot},
+			}},
+		},
+		bson.D{
+			{"$redact", bson.D{
+				{"$cond", bson.D{
+					{"if", bson.D{
+						{"ID", rootId},
+					}},
+					{"then", "$$KEEP"},
+					{"else", "DESCEND"},
+				}},
+			}},
+		},
+		bson.D{
+			{"$push", bson.D{
+				{"Replies", comment},
+			}},
+		},
+	})
 	check(err)
-	return comment
 }
 
-func writeComment(comment Comment) {
-	_, err := commentsdb.InsertOne(ctx, comment)
+func removeComment(id, rootId, trueRoot string) {
+	_, err := threadsdb.Aggregate(ctx, mongo.Pipeline{
+		bson.D{
+			{"$match", bson.D{
+				{"ID", trueRoot},
+			}},
+		},
+		bson.D{
+			{"$redact", bson.D{
+				{"$cond", bson.D{
+					{"if", bson.D{
+						{"ID", rootId},
+					}},
+					{"then", "$$KEEP"},
+					{"else", "DESCEND"},
+				}},
+			}},
+		},
+		bson.D{
+			{"$pull", bson.D{
+				{"Replies", bson.D{
+					{"ID", id},
+				}},
+			}},
+		},
+	})
 	check(err)
 }
 
-func removeComment(filter bson.D) {
-	res := commentsdb.FindOneAndDelete(ctx, filter)
-	check(res.Err())
-}
-
-func updateComment(filter bson.D, update bson.D) {
-	_, err := commentsdb.UpdateOne(ctx, filter, update)
+func updateComment(id, rootId, trueRoot string, update bson.D) {
+	_, err := threadsdb.Aggregate(ctx, mongo.Pipeline{
+		bson.D{
+			{"$match", bson.D{
+				{"ID", trueRoot},
+			}},
+		},
+		bson.D{
+			{"$redact", bson.D{
+				{"$cond", bson.D{
+					{"if", bson.D{
+						{"ID", rootId},
+					}},
+					{"then", "$$KEEP"},
+					{"else", "DESCEND"},
+				}},
+			}},
+		},
+		update,
+	})
 	check(err)
 }
 
-func containsComment(filter bson.D) bool {
-	comment := Comment{}
-	err := commentsdb.FindOne(ctx, filter).Decode(&comment)
-	check(err)
-	return err == nil
+func containsComment(id, rootID string) bool {
+	return readComment(id, rootID).ID == id
 }
 
 func getVotes(username string) Votes {
@@ -252,7 +276,6 @@ func containsVotes(filter bson.D) bool {
 }
 
 func containsVote(username string, post string, isThread bool) bool {
-	//return containsVotes(bson.D{{Key: "Username", Value: username}, {Key: "Votes.$.Post", Value: post}, {Key: "Votes.$.IsThread", Value: isThread}})
 	return getVote(username, post, isThread) != Vote{}
 }
 
