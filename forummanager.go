@@ -8,8 +8,6 @@ import (
 )
 
 var threadsdb *mongo.Collection
-
-//var commentsdb *mongo.Collection
 var votesdb *mongo.Collection
 
 type Thread struct {
