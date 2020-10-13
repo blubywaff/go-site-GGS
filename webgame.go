@@ -11,11 +11,11 @@ func webgame(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	username := getUser(w, req).Username
-	if !containsPlayer(bson.D{{"Username", username}, {"IsTraining", true}}) {
+	if !containsPlayer(bson.D{{"Username", username}}) {
 		tpls.ExecuteTemplate(w, "newplayer.gohtml", nil)
 		return
 	}
-	if !containsPlayer(bson.D{{"Username", username}, {"IsTraining", false}}) {
+	if !containsPlayer(bson.D{{"Username", username}, {"HasTrained", true}}) {
 		tpls.ExecuteTemplate(w, "gamestart.gohtml", nil)
 		return
 	}
@@ -31,7 +31,7 @@ func training(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	username := getUser(w, req).Username
-	writePlayer(Player{true, username, []Ship{}, Base{}})
+	writePlayer(Player{false, username, []Ship{}, Base{}})
 	tpls.ExecuteTemplate(w, "trainingground.gohtml", nil)
 }
 

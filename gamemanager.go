@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -8,21 +9,24 @@ import (
 var playersdb *mongo.Collection
 
 type Player struct {
-	IsTraining bool   `bson:"IsTraining"`
+	HasTrained bool   `bson:"HasTrained"`
 	Username   string `bson:"Username"`
 	Ships      []Ship `bson:"Ships"`
 	Base       Base   `bson:"Base"`
 }
 
 type Base struct {
-	Strength int `bson:"Strength"`
-	Power    int `bson:"Power"`
-	Water    int `bson:"Water"`
-	Metal    int `bson:"Metal"`
-	Fuel     int `bson:"Fuel"`
+	Owner    string   `bson:"Owner"`
+	Strength int      `bson:"Strength"`
+	Power    int      `bson:"Power"`
+	Water    int      `bson:"Water"`
+	Metal    int      `bson:"Metal"`
+	Fuel     int      `bson:"Fuel"`
+	Turrets  []Turret `bson:"Turrets"`
 }
 
 type Ship struct {
+	ID       string `bson:"ID"`
 	Type     string `bson:"Type"`
 	IsMain   bool   `bson:"IsMain"`
 	Strength int    `bson:"Strength"`
@@ -30,16 +34,13 @@ type Ship struct {
 	Crew     int    `bson:"Crew"`
 }
 
+type Turret struct {
+	ID    string `bson:"ID"`
+	Level int    `bson:"Level"`
+}
+
 func getPlayer(username string) Player {
 	return readPlayer(bson.D{{"Username", username}})
-}
-
-func getShips(username string) []Ship {
-	return getPlayer(username).Ships
-}
-
-func getBase(username string) Base {
-	return getPlayer(username).Base
 }
 
 func aggregatePlayersdb(pipeline mongo.Pipeline) []bson.M {
@@ -80,4 +81,141 @@ func containsPlayer(filter bson.D) bool {
 	err := playersdb.FindOne(ctx, filter).Decode(&player)
 	check(err)
 	return err == nil
+}
+
+func getShips(username string) []Ship {
+	//TODO fix this
+	return getPlayer(username).Ships
+}
+
+func getShip(username string, shipID string) Ship {
+	cursor, err := playersdb.Aggregate(ctx, mongo.Pipeline{
+		bson.D{
+			{"$match", bson.D{
+				{"Username", username},
+			}},
+		},
+		bson.D{
+			{"$project", bson.D{
+				{"Ships", true},
+			}},
+		},
+		bson.D{
+			{"$unwind", bson.D{
+				{"path", "$Ships"},
+			}},
+		},
+		bson.D{
+			{"$match", bson.D{
+				{"ID", shipID},
+			}},
+		},
+	})
+	if !check(err) {
+		return Ship{}
+	}
+	var m []bson.M
+	err = cursor.All(ctx, &m)
+	if !check(err) {
+		return Ship{}
+	}
+	if len(m) < 1 {
+		fmt.Println("No ship")
+		return Ship{}
+	}
+	mShip := m[0]["Ships"].(bson.M)
+	bb, err := bson.Marshal(mShip)
+	check(err)
+	var ship Ship
+	err = bson.Unmarshal(bb, &ship)
+	return ship
+}
+
+func updateShip(username string, shipID string, update bson.D) {
+	updatePlayer(bson.D{{"Username", username}, {"Ships.ID", shipID}}, update)
+}
+
+func writeShip(username string, ship Ship) {
+	updatePlayer(bson.D{{"Username", username}}, bson.D{{"$push", bson.D{{"Ships", ship}}}})
+}
+
+func removeShip(username string, shipID string) {
+	updatePlayer(bson.D{{"Username", username}}, bson.D{{"$pull", bson.D{{"Ships", bson.D{{"ID", shipID}}}}}})
+}
+
+func getBase(username string) Base {
+	return getPlayer(username).Base
+}
+
+func updateBase(username string, update bson.D) {
+	updatePlayer(bson.D{{"Username", username}}, update)
+}
+
+func writeBase(username, string, base Base) {
+	updatePlayer(bson.D{{"Username", username}}, bson.D{{"$set", bson.D{{"Base", base}}}})
+}
+
+func getTurrets(username string) []Turret {
+	//TODO fix this
+	return getPlayer(username).Base.Turrets
+}
+
+func getTurret(username string, turretID string) Turret {
+	cursor, err := playersdb.Aggregate(ctx, mongo.Pipeline{
+		bson.D{
+			{"$match", bson.D{
+				{"Username", username},
+			}},
+		},
+		bson.D{
+			{"$project", bson.D{
+				{"Turrets", "$Base.Turrets"},
+			}},
+		},
+		bson.D{
+			{"$project", bson.D{
+				{"Turrets", true},
+			}},
+		},
+		bson.D{
+			{"$unwind", bson.D{
+				{"path", "$Turrets"},
+			}},
+		},
+		bson.D{
+			{"$match", bson.D{
+				{"ID", turretID},
+			}},
+		},
+	})
+	if !check(err) {
+		return Turret{}
+	}
+	var m []bson.M
+	err = cursor.All(ctx, &m)
+	if !check(err) {
+		return Turret{}
+	}
+	if len(m) < 1 {
+		fmt.Println("No turret")
+		return Turret{}
+	}
+	mTurret := m[0]["Turrets"].(bson.M)
+	bb, err := bson.Marshal(mTurret)
+	check(err)
+	var turret Turret
+	err = bson.Unmarshal(bb, &turret)
+	return turret
+}
+
+func updateTurret(username string, turretID string, update bson.D) {
+	updatePlayer(bson.D{{"Username", username}, {"Base.Turrets.ID", turretID}}, update)
+}
+
+func writeTurret(username string, turret Turret) {
+	updatePlayer(bson.D{{"Username", username}}, bson.D{{"$push", bson.D{{"Base.Turrets", turret}}}})
+}
+
+func removeTurret(username string, turretID string) {
+	updatePlayer(bson.D{{"Username", username}}, bson.D{{"$pull", bson.D{{"Base.Turrets", bson.D{{"ID", turretID}}}}}})
 }
