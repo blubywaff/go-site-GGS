@@ -22,21 +22,66 @@ type Base struct {
 	Water    int      `bson:"Water"`
 	Metal    int      `bson:"Metal"`
 	Fuel     int      `bson:"Fuel"`
+	People   int      `bson:"People"`
 	Turrets  []Turret `bson:"Turrets"`
 }
 
 type Ship struct {
 	ID       string `bson:"ID"`
-	Type     string `bson:"Type"`
-	IsMain   bool   `bson:"IsMain"`
+	Level    int    `bson:"Level"`
 	Strength int    `bson:"Strength"`
 	Defense  int    `bson:"Defense"`
 	Crew     int    `bson:"Crew"`
 }
 
 type Turret struct {
-	ID    string `bson:"ID"`
-	Level int    `bson:"Level"`
+	ID       string   `bson:"ID"`
+	Level    int      `bson:"Level"`
+	Position Position `bson:"Position"`
+}
+
+type Position struct {
+	X int `bson:"X"`
+	Y int `bson:"Y"`
+}
+
+func (b Base) hasTurretByPosition(pos Position) bool {
+	return b.getTurretByPosition(pos) != Turret{}
+}
+
+func (b Base) hasTurretByID(id string) bool {
+	return b.getTurretByID(id) != Turret{}
+}
+
+func (b Base) getTurretByPosition(pos Position) Turret {
+	for _, turret := range b.Turrets {
+		if turret.Position == pos {
+			return turret
+		}
+	}
+	return Turret{}
+}
+
+func (b Base) getTurretByID(id string) Turret {
+	for _, turret := range b.Turrets {
+		if turret.ID == id {
+			return turret
+		}
+	}
+	return Turret{}
+}
+
+func (p Player) hasShipByID(id string) bool {
+	return p.getShipByID(id) != Ship{}
+}
+
+func (p Player) getShipByID(id string) Ship {
+	for _, ship := range p.Ships {
+		if ship.ID == id {
+			return ship
+		}
+	}
+	return Ship{}
 }
 
 func getPlayer(username string) Player {

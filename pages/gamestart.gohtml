@@ -3,6 +3,8 @@
 {{template "globalhead" "New Player"}}
 <body>
 <h3>You are ready to start a base!</h3>
-<p><a href="/webgame/">Begin!</a></p>
+<p><a href="/webgame/" onclick="initBase();makeReal();">Begin!</a></p>
 </body>
+    {{template "initBase"}}
+    {{template "makeReal"}}
 </html>

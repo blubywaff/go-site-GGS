@@ -10,7 +10,6 @@
 </style>
 
 <form method="post" id="signup-form">
-
     <input type="text" name="username" id="username" placeholder="username"><p id="username-error"></p>
     <input type="email" name="email" placeholder="email"><br>
     <input type="password" name="password" id="password" placeholder="password"><br>
@@ -18,8 +17,6 @@
     <input type="text" name="firstname" placeholder="first name"><br>
     <input type="text" name="lastname" placeholder="last name"><br>
     <input type="submit" value="Sign Up">
-
-
 </form>
 
 <script>
@@ -47,7 +44,7 @@
             passwordError.textContent = 'Confirm your password.';
             return false;
         }
-        if(password.value != passwordConfirm.value) {
+        if(password.value !== passwordConfirm.value) {
             passwordError.textContent = 'Re-enter passwords.';
             passwword.value = '';
             passwordConfirm.value = '';
@@ -67,7 +64,7 @@
         xmlRequest.addEventListener('readystatechange', function(){
             if(xmlRequest.readyState === XMLHttpRequest.DONE && xmlRequest.status === 200) {
                 var res = xmlRequest.responseText;
-                if(res == 'true') {
+                if(res === 'true') {
                     usernameError.textContent = 'Username Taken';
                     document.querySelector('#signup').disabled = true;
                 } else {
