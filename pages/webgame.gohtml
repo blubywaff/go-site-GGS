@@ -1,8 +1,151 @@
 <!DOCTYPE html>
 <html>
 {{template "globalhead" "Space Base"}}
-<body>
-<h1>GAME PLACEHOLDER TEXT</h1>
-<!-- TODO fix this -->
+<style>
+    .turret-level {
+        display: inline-block;
+        width: 50px;
+    }
+    .turret-position {
+        display: inline-block;
+        width: 75px;
+    }
+    .ship-level {
+        display: inline-block;
+        width: 50px;
+    }
+</style>
+{{template "gametypes"}}
+{{template "gameAJAX"}}
+<script>
+
+    var player;
+
+    function writeResources(player) {
+        let water = document.getElementById("water");
+        let metal = document.getElementById("metal");
+        let fuel = document.getElementById("fuel");
+        let power = document.getElementById("power");
+        water.innerText = player.Base.Water;
+        metal.innerText = player.Base.Metal;
+        fuel.innerText = player.Base.Fuel;
+        power.innerText = player.Base.Power;
+    }
+
+    function writeTurrets(player) {
+        let turrets = document.getElementById("turrets");
+
+        while(turrets.childNodes.length > 4) {
+            turrets.removeChild(turrets.lastChild);
+        }
+
+        for (const turret of player.Base.Turrets) {
+            console.log(turret);
+            console.log(turret.ID);
+            let turretE = document.createElement("p");
+
+            let level = document.createElement("span");
+            level.setAttribute("class", "turret-level");
+            let text = document.createTextNode(turret.Level + "");
+            level.appendChild(text);
+
+            let position = document.createElement("span");
+            position.setAttribute("class", "turret-position");
+            text = document.createTextNode(turret.Position.X + " " + turret.Position.Y);
+            position.appendChild(text);
+
+            let upgrade = document.createElement("button");
+            upgrade.setAttribute("onclick", "levelTurret(\"" + turret.ID + "\");")
+            text = document.createTextNode("+");
+            upgrade.appendChild(text);
+
+            turretE.appendChild(level);
+            turretE.appendChild(position);
+            turretE.appendChild(upgrade);
+            turrets.appendChild(turretE);
+        }
+    }
+
+    function writeShips(player) {
+        let ships = document.getElementById("ships");
+
+        while(ships.childNodes.length > 2) {
+            ships.removeChild(ships.lastChild);
+        }
+
+        for (const ship of player.Ships) {
+            let shipE = document.createElement("p");
+
+            let level = document.createElement("span");
+            level.setAttribute("class", "ship-level");
+            let text = document.createTextNode(ship.Level);
+            level.appendChild(text);
+
+            let position = document.createElement("span");
+            position.setAttribute("class", "ship-crew");
+            text = document.createTextNode(ship.Crew);
+            position.appendChild(text);
+
+            shipE.appendChild(level);
+            shipE.appendChild(position);
+            ships.appendChild(shipE);
+        }
+
+    }
+
+    function update() {
+        let res = gameAjax("get", null, function(res) {
+            console.log(res);
+            if(res.startsWith("error")) {
+                console.log(res);
+                return;
+            }
+            player = JSON.parse(res);
+            console.log(player);
+            writeResources(player);
+            writeTurrets(player);
+            writeShips(player);
+        });
+    }
+
+    function addTurret() {
+        gameAjax("turret|add|", new Turret("ID?", 1, new Position(parseInt(document.getElementById("turret-position-one").value), parseInt(document.getElementById("turret-position-two").value))), function(res){console.log(res);});
+    }
+
+    function levelTurret(iden) {
+        gameAjax("turret|change|", new Turret(iden, 100, Base.getTurretByID(player.Base, iden).Position), function(res){console.log(res);});
+    }
+
+    //---------------------------------------------------------
+
+    function commandTest(command, type) {
+        gameAjax(command + "|", (typeof type === "string" ? type : JSON.stringify(type)), function(res){console.log(res);});
+    }
+
+</script>
+<body onload="update();">
+<button onclick="update();">Reload</button>
+<h1>Resources</h1>
+<section id="resources">
+    <!-- Resources will be updated with ajax -->
+    <p>Water: <span id="water">{{.Base.Water}}</span> Metal: <span id="metal">{{.Base.Metal}}</span> Fuel: <span id="fuel">{{.Base.Fuel}}</span> Power: <span id="power">{{.Base.Power}}</span></p>
+</section>
+<h1>Base</h1>
+<section id="base">
+    <h2>Turrets</h2>
+    <div id="turrets">
+        <!-- Turrets go here --- Will be added using ajax -->
+        <p><span class="turret-level">Level</span><span class="turret-position">Position</span></p>
+        <p><span class="turret-level">---</span><span><input type="number" id="turret-position-one"><input type="number" id="turret-position-two"></span><button onclick="addTurret();">Add</button></p>
+    </div>
+    <h2>System</h2>
+    <div id="system">
+
+    </div>
+</section>
+<h1>Ships</h1>
+<section id="ships">
+    <p><span class="ship-level">Level</span><span class="ship-crew">Crew</span></p>
+</section>
 </body>
 </html>

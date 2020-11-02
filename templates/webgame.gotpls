@@ -1,165 +1,73 @@
-{{define "globaltypes"}}
+{{define "gametypes"}}
     <script>
         class Position {
-            #X;
-            #Y;
             constructor(X, Y) {
-                this.#X = X;
-                this.#Y = Y;
+                this.X = X;
+                this.Y = Y;
             }
         }
-        class turret {
-            #ID;
-            #Level;
-            #Position;
+        class Turret {
             constructor(ID, Level, Position) {
-                this.#ID = ID;
-                this.#Level = Level;
-                this.#Position = Position;
+                this.ID = ID;
+                this.Level = Level;
+                this.Position = Position;
             }
         }
+
         class Ship {
-            #ID;
-            #Level;
-            #Strength;
-            #Defense;
-            #Crew;
-            constructor(ID, Level, Strength, Defense, Crew) {
-                this.#ID = ID;
-                this.#Level = Level;
-                this.#Strength = Strength;
-                this.#Defense = Defense;
-                this.#Crew = Crew;
+            constructor(ID, Level, Crew) {
+                this.ID = ID;
+                this.Level = Level;
+                this.Crew = Crew;
+            }
+        }
+
+        class Base {
+            constructor(Owner, Power, Water, Metal, Fuel, Planets, Turrets) {
+                this.Owner = Owner;
+                this.Power = Power;
+                this.Water = Water;
+                this.Metal = Metal;
+                this.Fuel = Fuel;
+                this.Planets = PLanets;
+                this.Turrets = Turrets;
+            }
+            static getTurretByID(base, iden) {
+                for (const turret of base.Turrets) {
+                    if(turret.ID === iden) {
+                        return turret;
+                    }
+                }
+                return null;
+            }
+        }
+
+        class Player {
+            constructor(HasTrained, Username, Ships, Base) {
+                this.HasTrained = HasTrained;
+                this.Username = Username;
+                this.Ships = Ships;
+                this.Base = Base;
             }
         }
     </script>
 {{end}}
 
-{{define "initBase"}}
+{{define "gameAJAX"}}
     <script>
-        function initBase() {
+        // command must end with a separator ("|") for type to be parsed and sent
+        // if command ends with pipe type should not be undefined or null
+        function gameAjax(command, type, func) {
             var xmlRequest = new XMLHttpRequest();
-            xmlRequest.open('POST', '/webgame', true);
+            xmlRequest.open('POST', '/webgame/', true);
             xmlRequest.addEventListener('readystatechange', function(){
                 if(xmlRequest.readyState === XMLHttpRequest.DONE && xmlRequest.status === 200) {
                     var res = xmlRequest.responseText;
-                    return res;
+                    func(res);
+                    return true;
                 }
             });
-            xmlRequest.send("init");
-        }
-    </script>
-{{end}}
-
-{{define "makeReal"}}
-    <script>
-        function makeReal() {
-            var xmlRequest = new XMLHttpRequest();
-            xmlRequest.open('POST', '/webgame', true);
-            xmlRequest.addEventListener('readystatechange', function(){
-                if(xmlRequest.readyState === XMLHttpRequest.DONE && xmlRequest.status === 200) {
-                    var res = xmlRequest.responseText;
-                    return res;
-                }
-            });
-            xmlRequest.send("real");
-        }
-    </script>
-{{end}}
-
-{{define "addTurret"}}
-    <script>
-        function addTurret(turret) {
-            var xmlRequest = new XMLHttpRequest();
-            xmlRequest.open('POST', '/webgame', true);
-            xmlRequest.addEventListener('readystatechange', function(){
-                if(xmlRequest.readyState === XMLHttpRequest.DONE && xmlRequest.status === 200) {
-                    var res = xmlRequest.responseText;
-                    return res;
-                }
-            });
-            xmlRequest.send("turret|add|" + JSON.stringify(turret));
-        }
-    </script>
-{{end}}
-
-{{define "removeTurret"}}
-    <script>
-        function removeTurret(turret) {
-            var xmlRequest = new XMLHttpRequest();
-            xmlRequest.open('POST', '/webgame', true);
-            xmlRequest.addEventListener('readystatechange', function(){
-                if(xmlRequest.readyState === XMLHttpRequest.DONE && xmlRequest.status === 200) {
-                    var res = xmlRequest.responseText;
-                    return res;
-                }
-            });
-            xmlRequest.send("turret|remove|" + JSON.stringify(turret));
-        }
-    </script>
-{{end}}
-
-{{define "changeTurret"}}
-    <script>
-        function removeTurret(turret) {
-            var xmlRequest = new XMLHttpRequest();
-            xmlRequest.open('POST', '/webgame', true);
-            xmlRequest.addEventListener('readystatechange', function(){
-                if(xmlRequest.readyState === XMLHttpRequest.DONE && xmlRequest.status === 200) {
-                    var res = xmlRequest.responseText;
-                    return res;
-                }
-            });
-            xmlRequest.send("turret|change|" + JSON.stringify(turret));
-        }
-    </script>
-{{end}}
-
-<!-- TODO change to ship -->
-{{define "addShip"}}
-    <script>
-        function addShip(ship) {
-            var xmlRequest = new XMLHttpRequest();
-            xmlRequest.open('POST', '/webgame', true);
-            xmlRequest.addEventListener('readystatechange', function(){
-                if(xmlRequest.readyState === XMLHttpRequest.DONE && xmlRequest.status === 200) {
-                    var res = xmlRequest.responseText;
-                    return res;
-                }
-            });
-            xmlRequest.send("ship|add|" + JSON.stringify(ship));
-        }
-    </script>
-{{end}}
-
-{{define "removeShip"}}
-    <script>
-        function removeShip(ship) {
-            var xmlRequest = new XMLHttpRequest();
-            xmlRequest.open('POST', '/webgame', true);
-            xmlRequest.addEventListener('readystatechange', function(){
-                if(xmlRequest.readyState === XMLHttpRequest.DONE && xmlRequest.status === 200) {
-                    var res = xmlRequest.responseText;
-                    return res;
-                }
-            });
-            xmlRequest.send("ship|remove|" + JSON.stringify(ship));
-        }
-    </script>
-{{end}}
-
-{{define "changeShip"}}
-    <script>
-        function removeShip(ship) {
-            var xmlRequest = new XMLHttpRequest();
-            xmlRequest.open('POST', '/webgame', true);
-            xmlRequest.addEventListener('readystatechange', function(){
-                if(xmlRequest.readyState === XMLHttpRequest.DONE && xmlRequest.status === 200) {
-                    var res = xmlRequest.responseText;
-                    return res === 'true';
-                }
-            });
-            xmlRequest.send("ship|change|" + JSON.stringify(ship));
+            xmlRequest.send(command + (command.endsWith("|") ? JSON.stringify(type) : ""));
         }
     </script>
 {{end}}

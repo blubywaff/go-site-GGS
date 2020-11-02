@@ -3,8 +3,8 @@
 {{template "globalhead" "New Player"}}
 <body>
 <h3>You are ready to start a base!</h3>
-<p><a href="/webgame/" onclick="initBase();makeReal();">Begin!</a></p>
+<button onclick="gameAjax('init', null, function(res){console.log(res);});gameAjax('real', null, function(res){console.log(res);});location.reload();">Start!</button>
+
 </body>
-    {{template "initBase"}}
-    {{template "makeReal"}}
+    {{template "gameAJAX"}}
 </html>

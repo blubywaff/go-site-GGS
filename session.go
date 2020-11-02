@@ -48,7 +48,7 @@ func alreadyLoggedIn(w http.ResponseWriter, req *http.Request) bool {
 	if err != nil {
 		return false
 	}
-	http.SetCookie(w, &http.Cookie{Name: "session", Value: c.Value, MaxAge: 60, Path: "/"})
+	http.SetCookie(w, &http.Cookie{Name: "session", Value: c.Value, MaxAge: sessionLength, Path: "/"})
 	return containsSession(bson.D{{Key: "SessionID", Value: c.Value}})
 }
 

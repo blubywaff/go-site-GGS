@@ -16,22 +16,19 @@ type Player struct {
 }
 
 type Base struct {
-	Owner    string   `bson:"Owner"`
-	Strength int      `bson:"Strength"`
-	Power    int      `bson:"Power"`
-	Water    int      `bson:"Water"`
-	Metal    int      `bson:"Metal"`
-	Fuel     int      `bson:"Fuel"`
-	People   int      `bson:"People"`
-	Turrets  []Turret `bson:"Turrets"`
+	Owner   string   `bson:"Owner"`
+	Power   int      `bson:"Power"`
+	Water   int      `bson:"Water"`
+	Metal   int      `bson:"Metal"`
+	Fuel    int      `bson:"Fuel"`
+	Planets []int    `bson:"Planets"`
+	Turrets []Turret `bson:"Turrets"`
 }
 
 type Ship struct {
-	ID       string `bson:"ID"`
-	Level    int    `bson:"Level"`
-	Strength int    `bson:"Strength"`
-	Defense  int    `bson:"Defense"`
-	Crew     int    `bson:"Crew"`
+	ID    string `bson:"ID"`
+	Level int    `bson:"Level"`
+	Crew  int    `bson:"Crew"`
 }
 
 type Turret struct {
