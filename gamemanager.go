@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"time"
 )
 
 var playersdb *mongo.Collection
@@ -21,7 +22,7 @@ type Base struct {
 	Water   int      `bson:"Water"`
 	Metal   int      `bson:"Metal"`
 	Fuel    int      `bson:"Fuel"`
-	Planets []int    `bson:"Planets"`
+	Planets []Planet `bson:"Planets"`
 	Turrets []Turret `bson:"Turrets"`
 }
 
@@ -40,6 +41,11 @@ type Turret struct {
 type Position struct {
 	X int `bson:"X"`
 	Y int `bson:"Y"`
+}
+
+type Planet struct {
+	Level       int       `bson:"Level"`
+	CollectTime time.Time `bson:"CollectTime"`
 }
 
 func (b Base) hasTurretByPosition(pos Position) bool {
@@ -122,7 +128,7 @@ func containsPlayer(filter bson.D) bool {
 	player := Player{}
 	err := playersdb.FindOne(ctx, filter).Decode(&player)
 	check(err)
-	return err == nil
+	return err == nil || err != mongo.ErrNoDocuments
 }
 
 func getShips(username string) []Ship {

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
-{{template "globalhead" "New Player"}}
+{{template "globalhead" "Start!"}}
 <body>
 <h3>You are ready to start a base!</h3>
-<button onclick="gameAjax('init', null, function(res){console.log(res);});gameAjax('real', null, function(res){console.log(res);});location.reload();">Start!</button>
+<button onclick="gameAjax('init', null, function(res){console.log(res);});gameAjax('real', null, function(res){console.log(res);});setTimeout(function(){window.location.href='/webgame/';}, 1000);">Start!</button>
 
 </body>
     {{template "gameAJAX"}}

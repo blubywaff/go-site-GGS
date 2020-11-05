@@ -93,6 +93,17 @@
 
     }
 
+    function updatePlanets() {
+        let neptune = document.getElementById("neptune");
+        let titan = document.getElementById("titan");
+        let helios = document.getElementById("helios");
+        let thor = document.getElementById("thor");
+        neptune.innerText = player.Base.Planets[0].Level
+        titan.innerText = player.Base.Planets[1].Level
+        helios.innerText = player.Base.Planets[2].Level
+        thor.innerText = player.Base.Planets[3].Level
+    }
+
     function update() {
         let res = gameAjax("get", null, function(res) {
             console.log(res);
@@ -105,6 +116,7 @@
             writeResources(player);
             writeTurrets(player);
             writeShips(player);
+            updatePlanets();
         });
     }
 
@@ -114,6 +126,14 @@
 
     function levelTurret(iden) {
         gameAjax("turret|change|", new Turret(iden, 100, Base.getTurretByID(player.Base, iden).Position), function(res){console.log(res);});
+    }
+
+    function levelPlanet(planet) {
+        gameAjax("planet|" + planet + "|level", null, function(res){console.log(res);});
+    }
+
+    function collect(planet) {
+        gameAjax("planet|" + planet + "|collect", null, function(res){console.log(res);})
     }
 
     //---------------------------------------------------------
@@ -140,7 +160,10 @@
     </div>
     <h2>System</h2>
     <div id="system">
-
+        <p>Neptune: <span id="neptune"></span><button onclick="levelPlanet('neptune');">+</button><button onclick="collect('neptune');">Collect</button></p>
+        <p>Titan: <span id="titan"></span><button onclick="levelPlanet('titan');">+</button><button onclick="collect('titan');">Collect</button></p>
+        <p>Helios: <span id="helios"></span><button onclick="levelPlanet('helios');">+</button><button onclick="collect('helios');">Collect</button></p>
+        <p>Thor: <span id="thor"></span><button onclick="levelPlanet('thor');">+</button><button onclick="collect('thor');">Collect</button></p>
     </div>
 </section>
 <h1>Ships</h1>

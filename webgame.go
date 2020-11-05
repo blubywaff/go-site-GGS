@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func webgame(w http.ResponseWriter, req *http.Request) {
@@ -47,6 +48,7 @@ func training(w http.ResponseWriter, req *http.Request) {
 		http.Redirect(w, req, "/login/", http.StatusSeeOther)
 		return
 	}
+	//TODO SHOULD USE INIT AJAX NOT THIS
 	username := getUser(w, req).Username
 	writePlayer(Player{false, username, []Ship{}, Base{}})
 	tpls.ExecuteTemplate(w, "trainingground.gohtml", nil)
@@ -57,8 +59,6 @@ func gamestart(w http.ResponseWriter, req *http.Request) {
 		http.Redirect(w, req, "/login/", http.StatusSeeOther)
 		return
 	}
-	username := getUser(w, req).Username
-	writePlayer(Player{false, username, []Ship{}, Base{}})
 	tpls.ExecuteTemplate(w, "gamestart.gohtml", nil)
 }
 
@@ -81,9 +81,13 @@ func webgameAjax(w http.ResponseWriter, req *http.Request) {
 			fmt.Fprint(w, "error-exists")
 			return
 		}
-		writePlayer(Player{false, username, []Ship{}, Base{Owner: username}})
+		writePlayer(Player{false, username, []Ship{}, Base{Owner: username, Planets: []Planet{Planet{1, time.Now()}, Planet{1, time.Now()}, Planet{1, time.Now()}, Planet{1, time.Now()}}, Turrets: []Turret{}}})
 	} else if act == "real" {
 		if !containsPlayer(bson.D{{"Username", username}}) {
+			fmt.Fprint(w, "error-exists")
+			return
+		}
+		if containsPlayer(bson.D{{"Username", username}, {"HasTrained", true}}) {
 			fmt.Fprint(w, "error-exists")
 			return
 		}
@@ -265,6 +269,114 @@ func webgameAjax(w http.ResponseWriter, req *http.Request) {
 				updateShip(username, ship.ID, bson.D{{"$set", bson.D{{"Level", ship.Level}}}})
 			}
 		}
+	} else if act == "planet" {
+		act = requests[1]
+		base := getBase(username)
+		//fmt.Println("Planet " + strings.Join(requests, "|"))
+		if act == "thor" {
+			// Power
+			act = requests[2]
+			if act == "level" {
+				expense := planetLevelCost(base, 3)
+				affords := canAfford(base, expense)
+				if !affords[0] {
+					fmt.Fprint(w, "error-water")
+					return
+				} else if !affords[1] {
+					fmt.Fprint(w, "error-metal")
+					return
+				} else if !affords[2] {
+					fmt.Fprint(w, "error-fuel")
+					return
+				} else if !affords[3] {
+					fmt.Fprint(w, "error-power")
+					return
+				}
+				doCosts(base, expense)
+				updateBase(username, bson.D{{"$inc", bson.D{{"Base.Planets.3.Level", 1}}}})
+			} else if act == "collect" {
+				updateBase(username, bson.D{{"$inc", bson.D{{"Base.Power", planetCollect(base.Planets[3])}}}})
+				updateBase(username, bson.D{{"$set", bson.D{{"Base.Planets.3.CollectTime", time.Now()}}}})
+			}
+		} else if act == "neptune" {
+			// Water
+			act = requests[2]
+			//fmt.Println(requests)
+			if act == "level" {
+				expense := planetLevelCost(base, 0)
+				//fmt.Println(expense)
+				affords := canAfford(base, expense)
+				//fmt.Println(affords)
+				if !affords[0] {
+					fmt.Fprint(w, "error-water")
+					return
+				} else if !affords[1] {
+					fmt.Fprint(w, "error-metal")
+					return
+				} else if !affords[2] {
+					fmt.Fprint(w, "error-fuel")
+					return
+				} else if !affords[3] {
+					fmt.Fprint(w, "error-power")
+					return
+				}
+				doCosts(base, expense)
+				updateBase(username, bson.D{{"$inc", bson.D{{"Base.Planets.0.Level", 1}}}})
+			} else if act == "collect" {
+				updateBase(username, bson.D{{"$inc", bson.D{{"Base.Water", planetCollect(base.Planets[0])}}}})
+				updateBase(username, bson.D{{"$set", bson.D{{"Base.Planets.0.CollectTime", time.Now()}}}})
+			}
+		} else if act == "titan" {
+			// Metal
+			act = requests[2]
+			if act == "level" {
+				expense := planetLevelCost(base, 1)
+				affords := canAfford(base, expense)
+				if !affords[0] {
+					fmt.Fprint(w, "error-water")
+					return
+				} else if !affords[1] {
+					fmt.Fprint(w, "error-metal")
+					return
+				} else if !affords[2] {
+					fmt.Fprint(w, "error-fuel")
+					return
+				} else if !affords[3] {
+					fmt.Fprint(w, "error-power")
+					return
+				}
+				doCosts(base, expense)
+				updateBase(username, bson.D{{"$inc", bson.D{{"Base.Planets.1.Level", 1}}}})
+			} else if act == "collect" {
+				updateBase(username, bson.D{{"$inc", bson.D{{"Base.Metal", planetCollect(base.Planets[1])}}}})
+				updateBase(username, bson.D{{"$set", bson.D{{"Base.Planets.1.CollectTime", time.Now()}}}})
+			}
+		} else if act == "helios" {
+			// Fuel
+			act = requests[2]
+			if act == "level" {
+				expense := planetLevelCost(base, 2)
+				affords := canAfford(base, expense)
+				if !affords[0] {
+					fmt.Fprint(w, "error-water")
+					return
+				} else if !affords[1] {
+					fmt.Fprint(w, "error-metal")
+					return
+				} else if !affords[2] {
+					fmt.Fprint(w, "error-fuel")
+					return
+				} else if !affords[3] {
+					fmt.Fprint(w, "error-power")
+					return
+				}
+				doCosts(base, expense)
+				updateBase(username, bson.D{{"$inc", bson.D{{"Base.Planets.2.Level", 1}}}})
+			} else if act == "collect" {
+				updateBase(username, bson.D{{"$inc", bson.D{{"Base.Fuel", planetCollect(base.Planets[2])}}}})
+				updateBase(username, bson.D{{"$set", bson.D{{"Base.Planets.2.CollectTime", time.Now()}}}})
+			}
+		}
 	}
 	fmt.Fprint(w, "done")
 }
@@ -316,4 +428,13 @@ func shipLevelCost(ship Ship) []int {
 	costs[1] = int(math.Pow(float64(ship.Level), float64(2))) * multiplier * baseCost
 	costs[2] = int(math.Pow(float64(ship.Level), 1.2)) * multiplier * baseCost
 	return costs
+}
+
+func planetLevelCost(base Base, planet int) []int {
+	cost := int(math.Pow(float64(base.Planets[planet].Level), 2.0))
+	return []int{cost, cost, cost, cost}
+}
+
+func planetCollect(planet Planet) int {
+	return planet.Level * int(time.Now().Sub(planet.CollectTime).Seconds())
 }
