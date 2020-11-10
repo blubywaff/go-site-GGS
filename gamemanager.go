@@ -267,3 +267,35 @@ func writeTurret(username string, turret Turret) {
 func removeTurret(username string, turretID string) {
 	updatePlayer(bson.D{{"Username", username}}, bson.D{{"$pull", bson.D{{"Base.Turrets", bson.D{{"ID", turretID}}}}}})
 }
+
+func getBasesOfPower(power int, margin int) []Base {
+	lower := power - power*(margin/100)
+	higher := power + power*(margin/100)
+	cursor, err := playersdb.Aggregate(ctx, mongo.Pipeline{
+		bson.D{
+			{"$match",
+				bson.D{
+					{"$gte", bson.D{
+						{"Base.Strength", lower},
+					}},
+					{"$lte", bson.D{
+						{"Base.Strength", higher},
+					}},
+				},
+			},
+		},
+		bson.D{
+			{"$limit", 10},
+		},
+	})
+	if !check(err) {
+		return []Base{}
+	}
+	var results []Base
+	err = cursor.All(ctx, &results)
+	if !check(err) {
+		return []Base{}
+	}
+	fmt.Println(results)
+	return results
+}

@@ -49,6 +49,14 @@
                 this.Ships = Ships;
                 this.Base = Base;
             }
+            static getShipByID(player, iden) {
+                for (const ship of player.Ships) {
+                    if(ship.ID === iden) {
+                        return ship;
+                    }
+                }
+                return null;
+            }
         }
     </script>
 {{end}}

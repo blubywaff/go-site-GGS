@@ -230,17 +230,20 @@ func webgameAjax(w http.ResponseWriter, req *http.Request) {
 			id := uuid.New().String()
 			ship.ID = id
 			ship.Level = 1
-			ship.Crew = 1
 			writeShip(username, ship)
 
 		} else if act == "change" {
 			ship := Ship{}
-			err = json.Unmarshal([]byte(requests[2]), &ship)
+			jsonout, _ := strconv.Unquote(requests[2])
+			if jsonout == "" {
+				jsonout = requests[2]
+			}
+			err = json.Unmarshal([]byte(jsonout), &ship)
 			if !check(err) {
 				fmt.Fprint(w, "error-decode")
 				return
 			}
-			if base.hasTurretByID(ship.ID) {
+			if !player.hasShipByID(ship.ID) {
 				fmt.Fprint(w, "error-exists")
 				return
 			}
@@ -250,7 +253,7 @@ func webgameAjax(w http.ResponseWriter, req *http.Request) {
 				return
 			}
 			if ship.Level != original.Level {
-				expense := shipLevelCost(ship)
+				expense := shipLevelCost(original)
 				affords := canAfford(base, expense)
 				if !affords[0] {
 					fmt.Fprint(w, "error-water")
@@ -266,7 +269,7 @@ func webgameAjax(w http.ResponseWriter, req *http.Request) {
 					return
 				}
 				doCosts(base, expense)
-				updateShip(username, ship.ID, bson.D{{"$set", bson.D{{"Level", ship.Level}}}})
+				updateShip(username, ship.ID, bson.D{{"$inc", bson.D{{"Ships.$.Level", 1}}}})
 			}
 		}
 	} else if act == "planet" {
@@ -426,7 +429,8 @@ func shipLevelCost(ship Ship) []int {
 	baseCost := 1
 	costs := []int{0, 0, 0, 0}
 	costs[1] = int(math.Pow(float64(ship.Level), float64(2))) * multiplier * baseCost
-	costs[2] = int(math.Pow(float64(ship.Level), 1.2)) * multiplier * baseCost
+	costs[2] = int(math.Pow(float64(ship.Level), float64(1.2))) * multiplier * baseCost
+	fmt.Println(costs)
 	return costs
 }
 

@@ -69,7 +69,7 @@
     function writeShips(player) {
         let ships = document.getElementById("ships");
 
-        while(ships.childNodes.length > 2) {
+        while(ships.childNodes.length > 4) {
             ships.removeChild(ships.lastChild);
         }
 
@@ -86,8 +86,14 @@
             text = document.createTextNode(ship.Crew);
             position.appendChild(text);
 
+            let upgrade = document.createElement("button");
+            upgrade.setAttribute("onclick", "levelShip(\"" + ship.ID + "\");");
+            text = document.createTextNode("+");
+            upgrade.appendChild(text);
+
             shipE.appendChild(level);
             shipE.appendChild(position);
+            shipE.appendChild(upgrade);
             ships.appendChild(shipE);
         }
 
@@ -125,7 +131,7 @@
     }
 
     function levelTurret(iden) {
-        gameAjax("turret|change|", new Turret(iden, 100, Base.getTurretByID(player.Base, iden).Position), function(res){console.log(res);});
+        gameAjax("turret|change|", new Turret(iden, -1, Base.getTurretByID(player.Base, iden).Position), function(res){console.log(res);});
     }
 
     function levelPlanet(planet) {
@@ -133,7 +139,15 @@
     }
 
     function collect(planet) {
-        gameAjax("planet|" + planet + "|collect", null, function(res){console.log(res);})
+        gameAjax("planet|" + planet + "|collect", null, function(res){console.log(res);});
+    }
+
+    function addShip() {
+        gameAjax("ship|add|", new Ship("", 1, parseInt(document.getElementById("ship-crew").value)), function(res){console.log(res);});
+    }
+
+    function levelShip(iden) {
+        gameAjax("ship|change|", new Ship(iden, -1, Player.getShipByID(player, iden).Crew), function(res){console.log(res);});
     }
 
     //---------------------------------------------------------
@@ -169,6 +183,7 @@
 <h1>Ships</h1>
 <section id="ships">
     <p><span class="ship-level">Level</span><span class="ship-crew">Crew</span></p>
+    <p><span class="ship-level">---</span><span class="ship-crew"><input type="number" id="ship-crew"></span><button onclick="addShip();">Add</button></p>
 </section>
 </body>
 </html>
