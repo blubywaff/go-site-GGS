@@ -16,7 +16,7 @@ import (
 func webgame(w http.ResponseWriter, req *http.Request) {
 	if !alreadyLoggedIn(w, req) {
 		if req.Method == http.MethodPost {
-			fmt.Fprint(w, "YOU ARE NOT LOGGED IN! REQUEST FAILED!")
+			_, _ = fmt.Fprint(w, "YOU ARE NOT LOGGED IN! REQUEST FAILED!")
 			return
 		}
 		http.Redirect(w, req, "/login/", http.StatusSeeOther)
@@ -30,14 +30,14 @@ func webgame(w http.ResponseWriter, req *http.Request) {
 
 	username := getUser(w, req).Username
 	if !containsPlayer(bson.D{{"Username", username}}) {
-		tpls.ExecuteTemplate(w, "newplayer.gohtml", nil)
+		_ = tpls.ExecuteTemplate(w, "newplayer.gohtml", nil)
 		return
 	}
 	if !containsPlayer(bson.D{{"Username", username}, {"HasTrained", true}}) {
-		tpls.ExecuteTemplate(w, "gamestart.gohtml", nil)
+		_ = tpls.ExecuteTemplate(w, "gamestart.gohtml", nil)
 		return
 	}
-	tpls.ExecuteTemplate(w, "webgame.gohtml", nil)
+	_ = tpls.ExecuteTemplate(w, "webgame.gohtml", nil)
 	//playerT := readPlayer(bson.D{{"Username", username}, {"IsTraining", true}})
 	//player := readPlayer(bson.D{{"Username", username}, {"IsTraining", false}})
 
@@ -51,7 +51,7 @@ func training(w http.ResponseWriter, req *http.Request) {
 	//TODO SHOULD USE INIT AJAX NOT THIS
 	username := getUser(w, req).Username
 	writePlayer(Player{false, username, []Ship{}, Base{}})
-	tpls.ExecuteTemplate(w, "trainingground.gohtml", nil)
+	_ = tpls.ExecuteTemplate(w, "trainingground.gohtml", nil)
 }
 
 func gamestart(w http.ResponseWriter, req *http.Request) {
@@ -59,36 +59,46 @@ func gamestart(w http.ResponseWriter, req *http.Request) {
 		http.Redirect(w, req, "/login/", http.StatusSeeOther)
 		return
 	}
-	tpls.ExecuteTemplate(w, "gamestart.gohtml", nil)
+	_ = tpls.ExecuteTemplate(w, "gamestart.gohtml", nil)
 }
 
 func gamedetails(w http.ResponseWriter, req *http.Request) {
-	tpls.ExecuteTemplate(w, "gamedetails.gohtml", nil)
+	_ = tpls.ExecuteTemplate(w, "gamedetails.gohtml", nil)
+}
+
+func gameraid(w http.ResponseWriter, req *http.Request) {
+	if !alreadyLoggedIn(w, req) {
+		http.Redirect(w, req, "/login/", http.StatusSeeOther)
+		return
+	}
+	_ = tpls.ExecuteTemplate(w, "gameraidselect.gohtml", nil)
 }
 
 func webgameAjax(w http.ResponseWriter, req *http.Request) {
 	bytes, err := ioutil.ReadAll(req.Body)
 	check(err)
 	username := getUser(w, req).Username
+	player := getPlayer(username)
 	requests := strings.Split(string(bytes), "|")
 	act := requests[0]
+	var resultText string
 	if act == "get" {
 		data, _ := json.Marshal(getPlayer(username))
-		fmt.Fprint(w, string(data))
+		_, _ = fmt.Fprint(w, string(data))
 		return
 	} else if act == "init" {
 		if containsPlayer(bson.D{{"Username", username}}) {
-			fmt.Fprint(w, "error-exists")
+			_, _ = fmt.Fprint(w, "error-exists")
 			return
 		}
-		writePlayer(Player{false, username, []Ship{}, Base{Owner: username, Planets: []Planet{Planet{1, time.Now()}, Planet{1, time.Now()}, Planet{1, time.Now()}, Planet{1, time.Now()}}, Turrets: []Turret{}}})
+		writePlayer(Player{false, username, []Ship{}, Base{Owner: username, Planets: []Planet{{1, time.Now()}, {1, time.Now()}, {1, time.Now()}, {1, time.Now()}}, Turrets: []Turret{}}})
 	} else if act == "real" {
 		if !containsPlayer(bson.D{{"Username", username}}) {
-			fmt.Fprint(w, "error-exists")
+			_, _ = fmt.Fprint(w, "error-exists")
 			return
 		}
 		if containsPlayer(bson.D{{"Username", username}, {"HasTrained", true}}) {
-			fmt.Fprint(w, "error-exists")
+			_, _ = fmt.Fprint(w, "error-exists")
 			return
 		}
 		updatePlayer(bson.D{{"Username", username}}, bson.D{{"$set", bson.D{{"HasTrained", true}}}})
@@ -104,29 +114,29 @@ func webgameAjax(w http.ResponseWriter, req *http.Request) {
 			err = json.Unmarshal([]byte(jsonout), &turret)
 			if !check(err) {
 				if !json.Valid([]byte(requests[2])) {
-					fmt.Fprint(w, "error-decode-invalid")
+					_, _ = fmt.Fprint(w, "error-decode-invalid")
 					return
 				}
-				fmt.Fprint(w, "error-decode")
+				_, _ = fmt.Fprint(w, "error-decode")
 				return
 			}
 			if base.hasTurretByPosition(turret.Position) {
-				fmt.Fprint(w, "error-exists")
+				_, _ = fmt.Fprint(w, "error-exists")
 				return
 			}
 			expense := turretAddCost(base)
 			affords := canAfford(base, expense)
 			if !affords[0] {
-				fmt.Fprint(w, "error-water")
+				_, _ = fmt.Fprint(w, "error-water")
 				return
 			} else if !affords[1] {
-				fmt.Fprint(w, "error-metal")
+				_, _ = fmt.Fprint(w, "error-metal")
 				return
 			} else if !affords[2] {
-				fmt.Fprint(w, "error-fuel")
+				_, _ = fmt.Fprint(w, "error-fuel")
 				return
 			} else if !affords[3] {
-				fmt.Fprint(w, "error-power")
+				_, _ = fmt.Fprint(w, "error-power")
 				return
 			}
 			doCosts(base, expense)
@@ -142,11 +152,11 @@ func webgameAjax(w http.ResponseWriter, req *http.Request) {
 			}
 			err = json.Unmarshal([]byte(jsonout), &turret)
 			if !check(err) {
-				fmt.Fprint(w, "error-decode")
+				_, _ = fmt.Fprint(w, "error-decode")
 				return
 			}
 			if !base.hasTurretByID(turret.ID) {
-				fmt.Fprint(w, "error-exists")
+				_, _ = fmt.Fprint(w, "error-exists")
 				return
 			}
 			removeTurret(username, turret.ID)
@@ -158,20 +168,20 @@ func webgameAjax(w http.ResponseWriter, req *http.Request) {
 			}
 			err = json.Unmarshal([]byte(jsonout), &turret)
 			if !check(err) {
-				fmt.Fprint(w, "error-decode")
+				_, _ = fmt.Fprint(w, "error-decode")
 				return
 			}
 			if !base.hasTurretByID(turret.ID) {
-				fmt.Fprint(w, "error-exists")
+				_, _ = fmt.Fprint(w, "error-exists")
 				return
 			}
 			original := base.getTurretByID(turret.ID)
 			if original == turret {
-				fmt.Fprint(w, "error-same")
+				_, _ = fmt.Fprint(w, "error-same")
 				return
 			}
 			if turret.Position != original.Position && turret.Level != original.Level {
-				fmt.Fprint(w, "error-multiple")
+				_, _ = fmt.Fprint(w, "error-multiple")
 				return
 			} else if turret.Position != original.Position {
 				curpostur := base.getTurretByPosition(turret.Position)
@@ -184,46 +194,49 @@ func webgameAjax(w http.ResponseWriter, req *http.Request) {
 				expense := turretLevelCost(original)
 				affords := canAfford(base, expense)
 				if !affords[0] {
-					fmt.Fprint(w, "error-water")
+					_, _ = fmt.Fprint(w, "error-water")
 					return
 				} else if !affords[1] {
-					fmt.Fprint(w, "error-metal")
+					_, _ = fmt.Fprint(w, "error-metal")
 					return
 				} else if !affords[2] {
-					fmt.Fprint(w, "error-fuel")
+					_, _ = fmt.Fprint(w, "error-fuel")
 					return
 				} else if !affords[3] {
-					fmt.Fprint(w, "error-power")
+					_, _ = fmt.Fprint(w, "error-power")
 					return
 				}
 				doCosts(base, expense)
 				updateTurret(username, turret.ID, bson.D{{"$inc", bson.D{{"Base.Turrets.$.Level", 1}}}})
 			}
+		} else {
+			_, _ = fmt.Fprint(w, "error-request-1")
+			return
 		}
+
 	} else if act == "ship" {
 		act = requests[1]
-		player := getPlayer(username)
 		base := getBase(username)
 		if act == "add" {
 			ship := Ship{}
 			err = json.Unmarshal([]byte(requests[2]), &ship)
 			if !check(err) {
-				fmt.Fprint(w, "error-decode")
+				_, _ = fmt.Fprint(w, "error-decode")
 				return
 			}
 			expense := shipAddCost(player)
 			affords := canAfford(base, expense)
 			if !affords[0] {
-				fmt.Fprint(w, "error-water")
+				_, _ = fmt.Fprint(w, "error-water")
 				return
 			} else if !affords[1] {
-				fmt.Fprint(w, "error-metal")
+				_, _ = fmt.Fprint(w, "error-metal")
 				return
 			} else if !affords[2] {
-				fmt.Fprint(w, "error-fuel")
+				_, _ = fmt.Fprint(w, "error-fuel")
 				return
 			} else if !affords[3] {
-				fmt.Fprint(w, "error-power")
+				_, _ = fmt.Fprint(w, "error-power")
 				return
 			}
 			doCosts(base, expense)
@@ -240,37 +253,40 @@ func webgameAjax(w http.ResponseWriter, req *http.Request) {
 			}
 			err = json.Unmarshal([]byte(jsonout), &ship)
 			if !check(err) {
-				fmt.Fprint(w, "error-decode")
+				_, _ = fmt.Fprint(w, "error-decode")
 				return
 			}
 			if !player.hasShipByID(ship.ID) {
-				fmt.Fprint(w, "error-exists")
+				_, _ = fmt.Fprint(w, "error-exists")
 				return
 			}
 			original := player.getShipByID(ship.ID)
 			if original == ship {
-				fmt.Fprint(w, "error-same")
+				_, _ = fmt.Fprint(w, "error-same")
 				return
 			}
 			if ship.Level != original.Level {
 				expense := shipLevelCost(original)
 				affords := canAfford(base, expense)
 				if !affords[0] {
-					fmt.Fprint(w, "error-water")
+					_, _ = fmt.Fprint(w, "error-water")
 					return
 				} else if !affords[1] {
-					fmt.Fprint(w, "error-metal")
+					_, _ = fmt.Fprint(w, "error-metal")
 					return
 				} else if !affords[2] {
-					fmt.Fprint(w, "error-fuel")
+					_, _ = fmt.Fprint(w, "error-fuel")
 					return
 				} else if !affords[3] {
-					fmt.Fprint(w, "error-power")
+					_, _ = fmt.Fprint(w, "error-power")
 					return
 				}
 				doCosts(base, expense)
 				updateShip(username, ship.ID, bson.D{{"$inc", bson.D{{"Ships.$.Level", 1}}}})
 			}
+		} else {
+			_, _ = fmt.Fprint(w, "error-request-1")
+			return
 		}
 	} else if act == "planet" {
 		act = requests[1]
@@ -283,16 +299,16 @@ func webgameAjax(w http.ResponseWriter, req *http.Request) {
 				expense := planetLevelCost(base, 3)
 				affords := canAfford(base, expense)
 				if !affords[0] {
-					fmt.Fprint(w, "error-water")
+					_, _ = fmt.Fprint(w, "error-water")
 					return
 				} else if !affords[1] {
-					fmt.Fprint(w, "error-metal")
+					_, _ = fmt.Fprint(w, "error-metal")
 					return
 				} else if !affords[2] {
-					fmt.Fprint(w, "error-fuel")
+					_, _ = fmt.Fprint(w, "error-fuel")
 					return
 				} else if !affords[3] {
-					fmt.Fprint(w, "error-power")
+					_, _ = fmt.Fprint(w, "error-power")
 					return
 				}
 				doCosts(base, expense)
@@ -300,6 +316,9 @@ func webgameAjax(w http.ResponseWriter, req *http.Request) {
 			} else if act == "collect" {
 				updateBase(username, bson.D{{"$inc", bson.D{{"Base.Power", planetCollect(base.Planets[3])}}}})
 				updateBase(username, bson.D{{"$set", bson.D{{"Base.Planets.3.CollectTime", time.Now()}}}})
+			} else {
+				_, _ = fmt.Fprint(w, "error-request-2")
+				return
 			}
 		} else if act == "neptune" {
 			// Water
@@ -311,16 +330,16 @@ func webgameAjax(w http.ResponseWriter, req *http.Request) {
 				affords := canAfford(base, expense)
 				//fmt.Println(affords)
 				if !affords[0] {
-					fmt.Fprint(w, "error-water")
+					_, _ = fmt.Fprint(w, "error-water")
 					return
 				} else if !affords[1] {
-					fmt.Fprint(w, "error-metal")
+					_, _ = fmt.Fprint(w, "error-metal")
 					return
 				} else if !affords[2] {
-					fmt.Fprint(w, "error-fuel")
+					_, _ = fmt.Fprint(w, "error-fuel")
 					return
 				} else if !affords[3] {
-					fmt.Fprint(w, "error-power")
+					_, _ = fmt.Fprint(w, "error-power")
 					return
 				}
 				doCosts(base, expense)
@@ -328,6 +347,9 @@ func webgameAjax(w http.ResponseWriter, req *http.Request) {
 			} else if act == "collect" {
 				updateBase(username, bson.D{{"$inc", bson.D{{"Base.Water", planetCollect(base.Planets[0])}}}})
 				updateBase(username, bson.D{{"$set", bson.D{{"Base.Planets.0.CollectTime", time.Now()}}}})
+			} else {
+				_, _ = fmt.Fprint(w, "error-request-2")
+				return
 			}
 		} else if act == "titan" {
 			// Metal
@@ -336,16 +358,16 @@ func webgameAjax(w http.ResponseWriter, req *http.Request) {
 				expense := planetLevelCost(base, 1)
 				affords := canAfford(base, expense)
 				if !affords[0] {
-					fmt.Fprint(w, "error-water")
+					_, _ = fmt.Fprint(w, "error-water")
 					return
 				} else if !affords[1] {
-					fmt.Fprint(w, "error-metal")
+					_, _ = fmt.Fprint(w, "error-metal")
 					return
 				} else if !affords[2] {
-					fmt.Fprint(w, "error-fuel")
+					_, _ = fmt.Fprint(w, "error-fuel")
 					return
 				} else if !affords[3] {
-					fmt.Fprint(w, "error-power")
+					_, _ = fmt.Fprint(w, "error-power")
 					return
 				}
 				doCosts(base, expense)
@@ -353,6 +375,9 @@ func webgameAjax(w http.ResponseWriter, req *http.Request) {
 			} else if act == "collect" {
 				updateBase(username, bson.D{{"$inc", bson.D{{"Base.Metal", planetCollect(base.Planets[1])}}}})
 				updateBase(username, bson.D{{"$set", bson.D{{"Base.Planets.1.CollectTime", time.Now()}}}})
+			} else {
+				_, _ = fmt.Fprint(w, "error-request-2")
+				return
 			}
 		} else if act == "helios" {
 			// Fuel
@@ -361,16 +386,16 @@ func webgameAjax(w http.ResponseWriter, req *http.Request) {
 				expense := planetLevelCost(base, 2)
 				affords := canAfford(base, expense)
 				if !affords[0] {
-					fmt.Fprint(w, "error-water")
+					_, _ = fmt.Fprint(w, "error-water")
 					return
 				} else if !affords[1] {
-					fmt.Fprint(w, "error-metal")
+					_, _ = fmt.Fprint(w, "error-metal")
 					return
 				} else if !affords[2] {
-					fmt.Fprint(w, "error-fuel")
+					_, _ = fmt.Fprint(w, "error-fuel")
 					return
 				} else if !affords[3] {
-					fmt.Fprint(w, "error-power")
+					_, _ = fmt.Fprint(w, "error-power")
 					return
 				}
 				doCosts(base, expense)
@@ -378,10 +403,79 @@ func webgameAjax(w http.ResponseWriter, req *http.Request) {
 			} else if act == "collect" {
 				updateBase(username, bson.D{{"$inc", bson.D{{"Base.Fuel", planetCollect(base.Planets[2])}}}})
 				updateBase(username, bson.D{{"$set", bson.D{{"Base.Planets.2.CollectTime", time.Now()}}}})
+			} else {
+				_, _ = fmt.Fprint(w, "error-request-2")
+				return
 			}
+		} else {
+			_, _ = fmt.Fprint(w, "error-request-1")
+			return
 		}
+	} else if act == "raid" {
+		act = requests[1]
+		if act == "find" {
+			bases := getBasesOfStrength(player.Base.Strength, 10, 3, username)
+			res, err := json.Marshal(bases)
+			if !check(err) {
+				_, _ = fmt.Fprint(w, "error-internal")
+				return
+			}
+			resultText = string(res)
+			fmt.Println(bases)
+			fmt.Println(res)
+		} else if act == "do" {
+			raid := Raid{}
+			jsonout, _ := strconv.Unquote(requests[2])
+			if jsonout == "" {
+				jsonout = requests[2]
+			}
+			if !strings.Contains(jsonout, "\"Fleet\":[]") {
+				fmt.Println("before", jsonout)
+				fleetIndex := strings.Index(jsonout, "Fleet")
+				fleetStart := fleetIndex + 8
+				endFleet := strings.Index(jsonout[fleetStart:], "]")
+				fmt.Println(fleetIndex, fleetStart, endFleet, len(jsonout))
+				fmt.Println(jsonout[fleetStart : fleetStart+endFleet])
+				ids := strings.Split(strings.ReplaceAll(jsonout[fleetStart:fleetStart+endFleet], "\"", ""), ",")
+				fmt.Println(ids)
+				fleet := []Ship{}
+				for _, id := range ids {
+					fleet = append(fleet, getShip(username, id))
+				}
+				for _, ship := range fleet {
+					bb, err := json.Marshal(ship)
+					check(err)
+					jsonout = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(jsonout, ship.ID, string(bb)), "\"{", "{"), "}\"", "}")
+				}
+				fmt.Println("after", jsonout)
+			}
+			err = json.Unmarshal([]byte(jsonout), &raid)
+			if !check(err) {
+				_, _ = fmt.Fprint(w, "error-decode")
+				return
+			}
+			result := simulateRaid(raid)
+			doCosts(player.Base, []int{-result, -result, -result, -result})
+			resultText = strconv.Itoa(result)
+			fmt.Println(result)
+		} else {
+			_, _ = fmt.Fprint(w, "error-request-1")
+			return
+		}
+	} else {
+		_, _ = fmt.Fprint(w, "error-request-0")
+		return
 	}
-	fmt.Fprint(w, "done")
+
+	if requests[0] == "turret" || requests[0] == "planet" {
+		updateBase(username, bson.D{{"$set", bson.D{{"Base.Strength", calculateStrength(player.Base)}}}})
+	}
+
+	if resultText != "" {
+		_, _ = fmt.Fprint(w, "done"+"\n"+resultText)
+		return
+	}
+	_, _ = fmt.Fprint(w, "done")
 }
 
 // Water Metal Fuel Power
@@ -391,6 +485,27 @@ func canAfford(base Base, costs []int) []bool {
 
 func doCosts(base Base, costs []int) {
 	updateBase(base.Owner, bson.D{{"$inc", bson.D{{"Base.Water", -costs[0]}, {"Base.Metal", -costs[1]}, {"Base.Fuel", -costs[2]}, {"Base.Power", -costs[3]}}}})
+}
+
+func simulateRaid(raid Raid) int {
+	attackPower := 0
+	for _, ship := range raid.Fleet {
+		attackPower += ship.Level
+	}
+	defenderPower := getBase(raid.Target).Strength
+	remainder := attackPower - defenderPower
+	if remainder <= 0 {
+		return 0
+	}
+	return remainder
+}
+
+func calculateStrength(base Base) int {
+	strength := 0
+	for _, turret := range base.Turrets {
+		strength += turret.Level
+	}
+	return strength
 }
 
 // Formula: #turrets^2 * turretMultiplier * turretBaseCost

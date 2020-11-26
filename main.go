@@ -167,6 +167,9 @@ func main() {
 	mux.HandleFunc("/", sendHome)
 	mux.HandleFunc("/home/", home)
 	mux.HandleFunc("/proofos/", proofos)
+	mux.HandleFunc("/aboutus/", func(w http.ResponseWriter, req *http.Request) {
+		tpls.ExecuteTemplate(w, "aboutus.gohtml", nil)
+	})
 	mux.HandleFunc("/time/", serveTime)
 	mux.HandleFunc("/favicon.ico", favicon)
 	//mux.HandleFunc("/sendfile/", sendfile)
@@ -187,6 +190,7 @@ func main() {
 	mux.HandleFunc("/webgame/start/", gamestart)
 	mux.HandleFunc("/webgame/training/", training)
 	mux.HandleFunc("/webgame/details/", gamedetails)
+	mux.HandleFunc("/webgame/raid/", gameraid)
 
 	mux.HandleFunc("/test", test)
 	mux.HandleFunc("/test2", test2)

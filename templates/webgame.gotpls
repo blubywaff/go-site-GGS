@@ -23,14 +23,15 @@
         }
 
         class Base {
-            constructor(Owner, Power, Water, Metal, Fuel, Planets, Turrets) {
+            constructor(Owner, Power, Water, Metal, Fuel, Planets, Turrets, Strength) {
                 this.Owner = Owner;
                 this.Power = Power;
                 this.Water = Water;
                 this.Metal = Metal;
                 this.Fuel = Fuel;
-                this.Planets = PLanets;
+                this.Planets = Planets;
                 this.Turrets = Turrets;
+                this.Strength = Strength;
             }
             static getTurretByID(base, iden) {
                 for (const turret of base.Turrets) {
@@ -56,6 +57,15 @@
                     }
                 }
                 return null;
+            }
+        }
+
+        class Raid {
+            constructor(ID, Raider, Target, Fleet) {
+                this.ID = ID;
+                this.Raider = Raider;
+                this.Target = Target;
+                this.Fleet = Fleet;
             }
         }
     </script>

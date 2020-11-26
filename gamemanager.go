@@ -17,13 +17,14 @@ type Player struct {
 }
 
 type Base struct {
-	Owner   string   `bson:"Owner"`
-	Power   int      `bson:"Power"`
-	Water   int      `bson:"Water"`
-	Metal   int      `bson:"Metal"`
-	Fuel    int      `bson:"Fuel"`
-	Planets []Planet `bson:"Planets"`
-	Turrets []Turret `bson:"Turrets"`
+	Owner    string   `bson:"Owner"`
+	Power    int      `bson:"Power"`
+	Water    int      `bson:"Water"`
+	Metal    int      `bson:"Metal"`
+	Fuel     int      `bson:"Fuel"`
+	Planets  []Planet `bson:"Planets"`
+	Turrets  []Turret `bson:"Turrets"`
+	Strength int      `bson:"Strength"`
 }
 
 type Ship struct {
@@ -46,6 +47,13 @@ type Position struct {
 type Planet struct {
 	Level       int       `bson:"Level"`
 	CollectTime time.Time `bson:"CollectTime"`
+}
+
+type Raid struct {
+	ID     string `bson:"ID"`
+	Raider string `bson:"Raider"`
+	Target string `bson:"Target"`
+	Fleet  []Ship `bson:"Fleet"`
 }
 
 func (b Base) hasTurretByPosition(pos Position) bool {
@@ -72,6 +80,14 @@ func (b Base) getTurretByID(id string) Turret {
 		}
 	}
 	return Turret{}
+}
+
+func (b Base) calcStrength() {
+	str := 0
+	for _, turret := range b.Turrets {
+		str += turret.Level
+	}
+	b.Strength = str
 }
 
 func (p Player) hasShipByID(id string) bool {
@@ -137,7 +153,7 @@ func getShips(username string) []Ship {
 }
 
 func getShip(username string, shipID string) Ship {
-	cursor, err := playersdb.Aggregate(ctx, mongo.Pipeline{
+	/*cursor, err := playersdb.Aggregate(ctx, mongo.Pipeline{
 		bson.D{
 			{"$match", bson.D{
 				{"Username", username},
@@ -176,7 +192,14 @@ func getShip(username string, shipID string) Ship {
 	check(err)
 	var ship Ship
 	err = bson.Unmarshal(bb, &ship)
-	return ship
+	return ship*/
+	player := getPlayer(username)
+	for _, ship := range player.Ships {
+		if ship.ID == shipID {
+			return ship
+		}
+	}
+	return Ship{}
 }
 
 func updateShip(username string, shipID string, update bson.D) {
@@ -268,34 +291,66 @@ func removeTurret(username string, turretID string) {
 	updatePlayer(bson.D{{"Username", username}}, bson.D{{"$pull", bson.D{{"Base.Turrets", bson.D{{"ID", turretID}}}}}})
 }
 
-func getBasesOfPower(power int, margin int) []Base {
-	lower := power - power*(margin/100)
-	higher := power + power*(margin/100)
+func getBasesOfStrength(power int, margin int, n int, requester string) []Base {
+	lower := power - power*(margin/100.0)
+	higher := power + power*(margin/100.0)
 	cursor, err := playersdb.Aggregate(ctx, mongo.Pipeline{
 		bson.D{
 			{"$match",
 				bson.D{
-					{"$gte", bson.D{
-						{"Base.Strength", lower},
+					{"Base.Strength", bson.D{
+						{"$gte", lower},
 					}},
-					{"$lte", bson.D{
-						{"Base.Strength", higher},
+					{"Base.Strength", bson.D{
+						{"$lte", higher},
+					}},
+					{"Base.Owner", bson.D{
+						{"$ne", requester},
 					}},
 				},
 			},
 		},
 		bson.D{
-			{"$limit", 10},
+			{"$sample", bson.D{
+				{"size", n},
+			}},
+		},
+		bson.D{
+			{"$project", bson.D{
+				{"HasTrained", false},
+				{"Username", false},
+				{"Ships", false},
+			}},
+		},
+		bson.D{
+			{"$project", bson.D{
+				{"Owner", "$Base.Owner"},
+				{"Power", "$Base.Power"},
+				{"Water", "$Base.Water"},
+				{"Metal", "$Base.Metal"},
+				{"Fuel", "$Base.Fuel"},
+				{"Planets", "$Base.Planets"},
+				{"Turrets", "$Base.Turrets"},
+				{"Strength", "$Base.Strength"},
+			}},
 		},
 	})
 	if !check(err) {
 		return []Base{}
 	}
 	var results []Base
-	err = cursor.All(ctx, &results)
+	m := []bson.M{}
+	err = cursor.All(ctx, &m)
+	fmt.Println(m)
+	bb, err := bson.Marshal(struct{ Data []bson.M }{m})
+	fmt.Println(string(bb), err)
+	data := struct{ Data []Base }{}
+	err = bson.Unmarshal(bb, &data)
 	if !check(err) {
 		return []Base{}
 	}
-	fmt.Println(results)
+	results = data.Data
+	fmt.Println("results", results)
+	//return results
 	return results
 }

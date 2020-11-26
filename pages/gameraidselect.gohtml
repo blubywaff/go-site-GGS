@@ -1,0 +1,170 @@
+<!Doctype html>
+<html>
+{{template "globalhead" "Space Raid"}}
+<style>
+    .ship-level {
+        display: inline-block;
+        width: 50px;
+    }
+    .ship-crew {
+        display: inline-block;
+        width: 50px;
+    }
+</style>
+{{template "gametypes"}}
+{{template "gameAJAX"}}
+<script>
+    let targets = [];
+    let selection = "";
+    let enabledShips = [];
+
+    function writeShips(player) {
+        let ships = document.getElementById("fleet");
+
+        while(ships.childNodes.length > 2) {
+            ships.removeChild(ships.lastChild);
+        }
+
+        for (const ship of player.Ships) {
+            let shipE = document.createElement("p");
+
+            let level = document.createElement("span");
+            level.setAttribute("class", "ship-level");
+            let text = document.createTextNode(ship.Level);
+            level.appendChild(text);
+
+            let position = document.createElement("span");
+            position.setAttribute("class", "ship-crew");
+            text = document.createTextNode(ship.Crew);
+            position.appendChild(text);
+
+            let upgrade = document.createElement("button");
+            upgrade.setAttribute("onclick", "enableShip(\"" + ship.ID + "\");");
+            upgrade.setAttribute("id", ship.ID);
+            text = document.createTextNode("Enable");
+            upgrade.appendChild(text);
+
+            shipE.appendChild(level);
+            shipE.appendChild(position);
+            shipE.appendChild(upgrade);
+            ships.appendChild(shipE);
+        }
+    }
+
+    function enableShip(id) {
+        let isEnabled = false;
+        for (let i = 0; i < enabledShips.length; i++) {
+            if(enabledShips[i] === id) {
+                isEnabled = true;
+                enabledShips.splice(i, 1);
+            }
+        }
+        if(!isEnabled) {
+            enabledShips.push(id);
+        }
+        document.getElementById(id).innerText = isEnabled?"Enable":"Disable";
+    }
+
+    function update() {
+        gameAjax("get", null, function(res) {
+            console.log(res);
+            if(res.startsWith("error")) {
+                console.log(res);
+                return;
+            }
+            let player = JSON.parse(res);
+            console.log(player);
+            writeShips(player);
+            findTargets();
+        });
+    }
+
+    function writeTargets(targets) {
+        let targetsE = document.getElementById("targets");
+        while(targetsE.childNodes.length > 2) {
+            targetsE.removeChild(targetsE.lastChild);
+        }
+        for (const target of targets) {
+            let t = target;
+            if(t === undefined){
+                console.log("target undefined - Skipping!");
+                //continue;
+            }
+            let targetE = document.createElement("p");
+
+            let strength = document.createElement("span");
+            strength.setAttribute("class", "strength");
+            let text = document.createTextNode(t.Strength)
+            strength.appendChild(text);
+
+            let raid = document.createElement("button");
+            raid.setAttribute("class", "raid");
+            raid.setAttribute("onclick", "selectTarget(\"" + t.Owner + "\");")
+            text = document.createTextNode("raid");
+            raid.appendChild(text);
+
+            targetE.appendChild(strength);
+            targetE.appendChild(raid);
+            targetsE.appendChild(targetE);
+        }
+    }
+
+    function findTargets() {
+        gameAjax("raid|find", null, function(res) {
+            if(res.startsWith("error")) {
+                console.log(res);
+                return;
+            }
+            console.log(res);
+            console.log(res.substring(5, res.length));
+            targets = JSON.parse(res.substring(5, res.length));
+            console.log(targets[0]);
+            writeTargets(targets);
+        });
+    }
+
+    function selectTarget(owner) {
+        selection = owner;
+        //TODO selection things
+    }
+
+    function showResults(res) {
+        results = document.getElementById("results");
+        result = document.createElement("p");
+        text = document.createTextNode("You gained " + res.split("\n")[1] + " resources");
+        result.appendChild(text);
+        results.appendChild(result);
+        results.style.visibility = "visible";
+    }
+
+    function doRaid() {
+        //TODO THIS PLEASE DO IT
+        document.getElementById("fleet").style.visibility = "hidden";
+        document.getElementById("targets").style.visibility = "hidden";
+        gameAjax("raid|do|", new Raid("server-determine", "server-determine", selection, enabledShips), function(res) {
+            if(res.startsWith("error")) {
+                console.log(res);
+                return;
+            }
+            console.log(res);
+            showResults(res);
+        });
+    }
+</script>
+<body onload="update();">
+<h1>Raid</h1>
+<h2>Your Fleet</h2>
+<section id="fleet">
+    <p><span class="ship-level">Level</span><span class="ship-crew">Crew</span></p>
+</section>
+<h2>Targets</h2>
+<section id="targets">
+    <p><span class="strength">Strength</span></p>
+</section>
+<p><button id="doraid" onclick="doRaid()">Do Raid</button></p>
+<h1>Results</h1>
+<section id="results">
+
+</section>
+</body>
+</html>
