@@ -1,0 +1,60 @@
+{{define "home-navbar-css"}}
+    <style>
+        #navbar {
+            --background: #ff2020;
+            --text-color: #ffffff;
+        }
+        #navbar {
+            background-color: var(--background);
+            padding: 20px;
+        }
+        #navbar .element {
+            display: inline-block;
+        }
+        #account {
+            float: right;
+        }
+        #navbar .element span {
+            font-size: x-large;
+            margin-right: 20px;
+        }
+        #navbar .element span a:hover {
+            color: #cccccc;
+        }
+        #navbar .element span a {
+            color: var(--text-color);
+            text-decoration: none;
+        }
+    </style>
+{{end}}
+
+{{define "home-navbar-scripts"}}
+
+{{end}}
+
+{{define "home-navbar-html"}}
+    <div id="navbar">
+        <div id="nav" class="element">
+            <span id="home">
+                <a href="/home/">Home</a>
+            </span>
+            <span id="forum">
+                <a href="/forum/">Forum</a>
+            </span>
+            <span id="game">
+                <a href="/webgame/">Game</a>
+            </span>
+        </div>
+        <div id="account" class="element">
+            <span id="login">
+                <a href="/login/">Login</a>
+            </span>
+        </div>
+    </div>
+{{end}}
+
+{{define "home-navbar"}}
+    {{template "home-navbar-css"}}
+    {{template "home-navbar-scripts"}}
+    {{template "home-navbar-html"}}
+{{end}}
