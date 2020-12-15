@@ -20,19 +20,7 @@
 
     #navbar .element {
         display: inline-block;
-        align-content: baseline;
-    }
-
-    #account {
-        float: right;
-    }
-
-    #navbar .element span {
-        font-size: x-large;
-        margin-right: 20px;
-        color: var(--text-color);
-        text-decoration: none;
-        cursor: pointer;
+        vertical-align: middle;
     }
 
     #navbar .element #sidenav-button {
@@ -41,17 +29,34 @@
         margin-right: 20px;
     }
 
-    #navbar .element #sidenav-button:hover * {
-        background-color: #cccccc;
-    }
-
     #navbar .element #sidenav-button * {
         width: 20px;
         height: 3px;
         background-color: var(--text-color);
         margin: 4px 0;
-        transition: 0.5s;
+        transition: transform 0.5s, opacity 0.5s;
         cursor: inherit;
+    }
+
+    #navbar .element #sidenav-button:hover * {
+        background-color: #cccccc;
+    }
+
+    #navbar .element .text {
+        font-size: x-large;
+        margin-right: 20px;
+        color: var(--text-color);
+        text-decoration: none;
+        cursor: pointer;
+        display: inline-block;
+    }
+
+    #navbar #nav .text {
+        float: right;
+    }
+
+    #navbar #account {
+        float: right;
     }
 
     .change #bar1 {
@@ -66,7 +71,7 @@
         transform: translate(0px, -7px) rotate(45deg);
     }
 
-    #navbar .element *:hover {
+    #navbar .element div.text:hover {
         color: #cccccc;
     }
 
@@ -100,7 +105,7 @@
 
 <script>
     function toggleSideNav() {
-        document.getElementById("sidenav").style.width = (document.getElementById("sidenav").style.width === "0px")?"250px":"0px";
+        document.getElementById("sidenav").style.width = (document.getElementById("sidenav").style.width === "0px") ? "250px" : "0";
         document.getElementById("sidenav-button").classList.toggle("change");
     }
 </script>
@@ -112,16 +117,16 @@
             <div id="bar2"></div>
             <div id="bar3"></div>
         </div>
-        <span id="home-nav" onclick="window.location.href='/home/'">Home</span>
-        <span id="forum-nav" onclick="window.location.href='/forum/'">Forum</span>
-        <span id="game-nav" onclick="window.location.href='/webgame/'">Game</span>
+        <div id="home-nav" class="text" onclick="window.location.href='/home/'">Home</div>
+        <div id="forum-nav" class="text" onclick="window.location.href='/forum/'">Forum</div>
+        <div id="game-nav" class="text" onclick="window.location.href='/webgame/'">Game</div>
     </div>
     <div id="account" class="element">
-        <span id="account-nav" onclick="window.location.href='/login/'">Login</span>
+        <div id="account-nav" class="text" onclick="window.location.href='/login/'">Login</div>
     </div>
 </div>
 
-<div id="sidenav" style="width: 0px;">
+<div id="sidenav" style="width: 0;">
 
 </div>
 
