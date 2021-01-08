@@ -122,7 +122,13 @@
 </div>
 
 <div id="tops">
-
+    {{if .Top}}
+        {{range $t := .Top}}
+            {{template "threadwidget" $t}}
+        {{end}}h
+    {{else}}
+        <h1>its quiet here</h1>
+    {{end}}
 </div>
 
 </html>

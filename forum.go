@@ -9,7 +9,7 @@ import (
 )
 
 func forum(w http.ResponseWriter, req *http.Request) {
-	tpls.ExecuteTemplate(w, "forum.gohtml", getForumData())
+	tpls.ExecuteTemplate(w, "forumhome.gohtml", getForumData())
 }
 
 func forumThread(w http.ResponseWriter, req *http.Request) {
