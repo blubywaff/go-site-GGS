@@ -7,6 +7,14 @@
         cursor: default;
     }
 
+    body {
+        overflow: visible;
+    }
+
+    body::-webkit-scrollbar {
+        display: none;
+    }
+
     #navbar {
         --background: #ff2020;
         --text-color: #ffffff;
@@ -17,6 +25,9 @@
         background-color: var(--background);
         padding: 20px;
         min-height: 32px;
+        width: calc(100% - 20px);
+        position: fixed;
+        z-index: 999;
     }
 
     #navbar .element {
@@ -25,7 +36,7 @@
     }
 
     #navbar .element #sidenav-button {
-        cursor: pointer;
+    / / cursor: pointer;
         display: inline-block;
         margin-right: 20px;
     }
@@ -48,7 +59,7 @@
         margin-right: 20px;
         color: var(--text-color);
         text-decoration: none;
-        cursor: pointer;
+    / / cursor: pointer;
         display: inline-block;
     }
 
@@ -89,30 +100,128 @@
         color: #0000ff;
         background-color: #00ddff;
         border: 5px solid #000000;
-        margin-right: 10px;
-        margin-left: 10px;
-        margin-top: 20px;
     }
 
     #sidenav {
-        z-index: 1;
+        z-index: 999;
         transition: 0.5s;
         background-color: #222222;
         opacity: 80%;
-        height: 100%;
+        height: calc(100% - 72px);
         position: fixed;
         text-align: center;
+        bottom: 0;
+        overflow-x: hidden;
     }
 
     #sidenav * {
         opacity: 0;
         z-index: 2;
         transition: opacity 0.3s;
-        color: #fff;
+        color: #ffffff;
+      //width: 0;
+      //overflow-x: hidden;
     }
 
     #sidenav.change * {
         opacity: 100%;
+      //width: auto;
+    }
+
+    #title-wrapper {
+        padding-block: 20px;
+        padding-inline: 20px;
+        background: #b96fff;
+    }
+
+    #content {
+        text-align: center;
+        background: #000000;
+    }
+
+    #content #mission {
+        background: #424242;
+        height: 300px;
+    }
+
+    .content-wrapper {
+        display: inline-block;
+        transform: translateY(50px);
+    }
+
+    #mission .text {
+        font: 24px "Comic Sans MS", sans-serif;
+    }
+
+    .text-wrapper {
+        width: calc(50% - 10px);
+        vertical-align: middle;
+        margin-right: 5px;
+    }
+
+    #mission .text-wrapper {
+        float: left;
+    }
+
+    #mission .text-wrapper .text {
+        float: right;
+        transform: translateY(50%);
+    }
+
+    #about-us .text-wrapper {
+        float: right;
+    }
+
+    #about-us .text-wrapper .text {
+        float: left;
+        transform: translateY(50%);
+    }
+
+    .img-wrapper {
+        width: calc(50% - 10px);
+        margin-left: 5px;
+    }
+
+    #mission .img-wrapper {
+        float: right;
+    }
+
+
+    #mission .img-wrapper .img {
+        float: left;
+    }
+
+    #about-us .img-wrapper {
+        float: left
+    }
+
+    #about-us .img-wrapper .img {
+        float: right;
+    }
+
+    .clickable {
+        cursor: pointer;
+    }
+
+    #about-us {
+        height: 300px;
+    }
+
+    #about-us .text {
+        font: 24px "Comic Sans MS", sans-serif;
+        color: #fff;
+    }
+
+    .button-wrapper {
+        margin: 20px;
+    }
+
+    .button-wrapper div {
+        width: max-content;
+    }
+
+    #sidenav {
+        font: 18px "Times New Roman";
     }
 
 </style>
@@ -127,23 +236,57 @@
 
 <div id="navbar">
     <div id="nav" class="element">
-        <div id="sidenav-button" onclick="toggleSideNav();">
+        <div id="sidenav-button" onclick="toggleSideNav();" class="clickable">
             <div id="bar1"></div>
             <div id="bar2"></div>
             <div id="bar3"></div>
         </div>
-        <div id="game-nav" class="text" onclick="window.location.href='/webgame/'">Game</div>
-        <div id="forum-nav" class="text" onclick="window.location.href='/forum/'">Forum</div>
-        <div id="home-nav" class="text" onclick="window.location.href='/home/'">Home</div>
+        <div id="game-nav" class="text clickable" onclick="window.location.href='/webgame/'">Game</div>
+        <div id="forum-nav" class="text clickable" onclick="window.location.href='/forum/'">Forum</div>
+        <div id="home-nav" class="text clickable" onclick="window.location.href='/home/'">Home</div>
     </div>
     <div id="account" class="element">
-        <div id="account-nav" class="text" onclick="window.location.href='/login/'">Login</div>
+        <div id="account-nav" class="text clickable" onclick="window.location.href='/login/'">Login</div>
     </div>
 </div>
 
 <div id="sidenav" style="width: 0;">
-    <div>Main</div>
+    <div class="button-wrapper">
+        <div onclick="window.location.href='#mission'" class="clickable">Mission</div>
+    </div>
+    <div class="button-wrapper">
+        <div onclick="window.location.href='#about-us'" class="clickable">About Us</div>
+    </div>
 </div>
 
-<div id="title-name">Galleta Games and Software</div>
+<div style="height: 72px"></div>
+
+<div id="title-wrapper">
+    <div id="title-name">Galleta Games and Software</div>
+</div>
+
+<div id="content">
+    <div id="mission">
+        <div class="content-wrapper">
+            <div class="text-wrapper">
+                <div class="text">We Create!<br>Code Pog!<br>PogChamp Sadge</div>
+            </div>
+            <div class="img-wrapper">
+                <div class="img"><img src="mission.jpg" alt="mission"></div>
+            </div>
+        </div>
+    </div>
+    <div id="about-us">
+        <div class="content-wrapper">
+            <div class="img-wrapper">
+                <div class="img"><img src="mission.jpg" alt="mission"></div>
+            </div>
+            <div class="text-wrapper">
+                <div class="text">We Create!<br>Code Pog!<br>PogChamp Sadge</div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 </html>
