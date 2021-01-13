@@ -112,7 +112,7 @@ func sendHome(w http.ResponseWriter, req *http.Request) {
 }
 
 func home(w http.ResponseWriter, req *http.Request) {
-	tpls.ExecuteTemplate(w, "homepage.gohtml", nil)
+	tpls.ExecuteTemplate(w, "homepage.gohtml", getUser(w, req).Username)
 }
 
 func proofos(w http.ResponseWriter, req *http.Request) {
@@ -221,6 +221,11 @@ func main() {
 		}
 		mux.ServeHTTP(w, req)
 	})
+
+	handleTimer := time.AfterFunc(time.Microsecond, func() {
+		log.Fatal(http.ListenAndServe(":80", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) { http.Redirect(w, req, "https://"+req.Host, 307) })))
+	})
+	defer handleTimer.Stop()
 
 	log.Fatal(http.ListenAndServeTLS(":443", "TLS/cert.pem", "TLS/privkey.pem", handlerfunc))
 }

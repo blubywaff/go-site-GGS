@@ -223,6 +223,10 @@
     #sidenav {
         font: 18px "Times New Roman";
     }
+    
+    .clickable * {
+        cursor: inherit;
+    }
 
 </style>
 
@@ -246,7 +250,7 @@
         <div id="home-nav" class="text clickable" onclick="window.location.href='/home/'">Home</div>
     </div>
     <div id="account" class="element">
-        <div id="account-nav" class="text clickable" onclick="window.location.href='/login/'">Login</div>
+        <div id="account-nav" class="text clickable" onclick="window.location.href='/account/'">{{if .}}<img src="/account/profilepicture" width="32px">{{else}}Login{{end}}</div>
     </div>
 </div>
 

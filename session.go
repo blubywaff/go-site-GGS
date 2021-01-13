@@ -176,7 +176,9 @@ func checkUsername(w http.ResponseWriter, req *http.Request) {
 
 func getUser(w http.ResponseWriter, req *http.Request) user {
 	c, err := req.Cookie("session")
-	check(err)
+	if !check(err) {
+		return user{}
+	}
 	return readUser(bson.D{{Key: "Username", Value: readSession(bson.D{{Key: "SessionID", Value: c.Value}}).Username}})
 }
 
@@ -188,7 +190,7 @@ func hasSession(w http.ResponseWriter, req *http.Request) bool {
 func account(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodPost {
 		if !hasSession(w, req) {
-			http.Redirect(w, req, "/", http.StatusSeeOther)
+			http.Error(w, "Requires Valid Session", http.StatusForbidden)
 			return
 		}
 
@@ -202,7 +204,7 @@ func account(w http.ResponseWriter, req *http.Request) {
 		defer f.Close()
 
 		if !checkFile(finfo.Filename) {
-			http.Error(w, "Invalid File", http.StatusForbidden)
+			http.Error(w, "Invalid File", http.StatusBadRequest)
 			return
 		}
 
@@ -228,7 +230,7 @@ func account(w http.ResponseWriter, req *http.Request) {
 	if hasSession(w, req) {
 		tpls.ExecuteTemplate(w, "account.gohtml", getUser(w, req))
 	} else {
-		http.Redirect(w, req, "/", http.StatusSeeOther)
+		http.Redirect(w, req, "/login/", http.StatusSeeOther)
 	}
 }
 
