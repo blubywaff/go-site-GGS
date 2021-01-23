@@ -150,50 +150,68 @@
 <div style="height: 72px"></div>
 
 <style>
-
+    #content {
+        text-align: center;
+        background-color: #424242;
+    }
+    #content .display {
+        font-size: 18px;
+        color: #dddddd;
+        margin-block: 10px;
+    }
+    .section-head {
+        font-size: 24px;
+        color: green;
+        margin-top: 20px;
+    }
+    #profile-form {
+        display: inline-block;
+    }
 </style>
 
 <div id="title-wrapper">
-    <div id="title-name">Username</div>
+    <div id="title-name">Account Management</div>
 </div>
 </body>
 
 
 <body>
 <div id="content">
+    <div class="section-head">Username</div>
     <div id="username">
         <div class="display">Current Username: <b>{{.Username}}</b></div>
         <div class="edit">
-            <form style="display: inline-block">
-                <input type="text" placeholder="New Username">
-            </form>
+            <input type="text" placeholder="New Username">
             <button id="submit">Update</button>
         </div>
     </div>
+    <div class="section-head">Personal</div>
     <div id="personal">
         <div class="display">Email: <b>{{.Email}}</b></div>
         <div class="edit">
-            <form>
-                <input type="email" placeholder="New Email">
-            </form>
+            <input type="email" placeholder="New Email">
             <button id="submit">Update</button>
         </div>
         <div class="display">Name: <b>{{.Firstname}} {{.Lastname}}</b></div>
     </div>
+    <div class="section-head">Profile Picture</div>
+    <div id="profilepicture">
+        <div class="display">
+            <img id="pfpdisplay" src="/account/profilepicture" alt="Your Profile Picture">
+        </div>
+        <div class="edit">
+            <form method="POST" enctype="multipart/form-data" id="profile-form">
+                <input type="file" id="idx-f" name="file">
+            </form>
+            <button id="submit" onclick="fileHandle();setTimeout(function(){document.getElementById('pfpdisplay').src='/account/profilepicture?'+new Date().getTime();}, 100)">Update</button>
+        </div>
+    </div>
+    <div class="section-head">Account</div>
     <div id="account">
-        <button id="getdata">Get Data</button>
         <button id="delete">Delete Account</button>
         <p>Deleting your account will also permanently remove all of your stored data!</p>
     </div>
 </div>
-<p>Username: {{.Username}}</p><br>
-<p>Email: {{.Email}}</p><br>
-<p>Name: {{.Firstname}} {{.Lastname}}</p><br>
-<img src="/account/profilepicture">
-<form method="POST" enctype="multipart/form-data" id="profile-form">
-    <input type="file" id="idx-f" name="file">
-</form>
-<button id="submit" onclick="fileHandle()">Update</button>
 
 </body>
 <body>
