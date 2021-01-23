@@ -25,11 +25,197 @@ func getTime() string {
 	return time.Now().Format("01/02/2006 at 15:04:05 in timezone: MST -0700")
 }
 
+func createNavbar(params string) template.HTML {
+	return template.HTML("<style>\n" +
+		"    * {\n" +
+		"        cursor: default;\n" +
+		"    }\n\n" +
+		"    body {\n" +
+		"        overflow: visible;\n" +
+		"    }\n\n" +
+		"    body::-webkit-scrollbar {\n" +
+		"        display: none;\n" +
+		"    }\n\n" +
+		"    #navbar {\n" +
+		"        --background: #ff2020;\n" +
+		"        --text-color: #ffffff;\n" +
+		"        --text-hover-color: #cccccc;\n" +
+		"    }\n\n" +
+		"    #navbar {\n" +
+		"        background-color: var(--background);\n" +
+		"        padding: 20px;\n" +
+		"        min-height: 32px;\n" +
+		"        width: calc(100% - 20px);\n" +
+		"        position: fixed;\n" +
+		"        z-index: 999;\n" +
+		"    }\n\n" +
+		"    #navbar .element {\n" +
+		"        display: inline-block;\n" +
+		"        vertical-align: middle;\n" +
+		"    }\n\n" +
+		"    #navbar .element #sidenav-button {\n" +
+		"    / / cursor: pointer;\n" +
+		"        display: inline-block;\n" +
+		"        margin-right: 20px;\n" +
+		"    }\n\n" +
+		"    #navbar .element #sidenav-button * {\n" +
+		"        width: 20px;\n" +
+		"        height: 3px;\n" +
+		"        background-color: var(--text-color);\n" +
+		"        margin: 4px 0;\n" +
+		"        transition: transform 0.5s, opacity 0.5s;\n" +
+		"        cursor: inherit;\n" +
+		"    }\n\n" +
+		"    #navbar .element #sidenav-button:hover * {\n" +
+		"        background-color: var(--text-hover-color);\n" +
+		"    }\n\n" +
+		"    #navbar .element .text {\n" +
+		"        font-size: x-large;\n" +
+		"        margin-right: 20px;\n" +
+		"        color: var(--text-color);\n" +
+		"        text-decoration: none;\n" +
+		"    / / cursor: pointer;\n" +
+		"        display: inline-block;\n" +
+		"    }\n\n" +
+		"    #navbar #nav .text {\n" +
+		"        float: right;\n" +
+		"    }\n\n" +
+		"    #navbar #account {\n" +
+		"        float: right;\n" +
+		"    }\n\n" +
+		"    #sidenav-button.change #bar1 {\n" +
+		"        transform: translate(0px, 7px) rotate(-45deg);\n" +
+		"    }\n\n" +
+		"    #sidenav-button.change #bar2 {\n" +
+		"       opacity: 0;\n" +
+		"   }\n\n" +
+		"   #sidenav-button.change #bar3 {\n" +
+		"       transform: translate(0px, -7px) rotate(45deg);\n" +
+		"   }\n\n" +
+		"   #navbar .element div.text:hover {\n" +
+		"       color: var(--text-hover-color);\n" +
+		"   }\n\n" +
+		"   body {\n" +
+		"       background-color: #ffffff;\n" +
+		"   }\n\n" +
+		"   #title-name {\n" +
+		"       font-size: 48px;\n" +
+		"       text-align: center;\n" +
+		"   }\n\n" +
+		"   #title-name {\n" +
+		"       color: #0000ff;\n" +
+		"       background-color: #00ddff;\n" +
+		"       border: 5px solid #000000;\n" +
+		"   }\n\n" +
+		"   #sidenav {\n" +
+		"       z-index: 999;\n" +
+		"       transition: 0.5s;\n" +
+		"       background-color: #222222;\n" +
+		"       opacity: 80%;\n" +
+		"       height: calc(100% - 72px);\n" +
+		"       position: fixed;\n" +
+		"       text-align: center;\n" +
+		"       bottom: 0;\n" +
+		"       overflow-x: hidden;\n" +
+		"   }\n\n" +
+		"   #sidenav * {\n" +
+		"       opacity: 0;\n" +
+		"       z-index: 2;\n" +
+		"       transition: opacity 0.3s;\n" +
+		"       color: #ffffff;\n" +
+		"     //width: 0;\n" +
+		"     //overflow-x: hidden;\n" +
+		"   }\n\n" +
+		"   #sidenav.change * {\n" +
+		"       opacity: 100%;\n" +
+		"     //width: auto;\n" +
+		"   }\n\n" +
+		"   #title-wrapper {\n" +
+		"       padding-block: 20px;\n" +
+		"       padding-inline: 20px;\n" +
+		"       background: #b96fff;\n" +
+		"   }\n\n" +
+		"   #content {\n" +
+		"       text-align: center;\n" +
+		"       background: #000000;\n" +
+		"   }\n\n" +
+		"   #content #mission {\n" +
+		"       background: #424242;\n" +
+		"       height: 300px;\n" +
+		"   }\n\n" +
+		"   .content-wrapper {\n" +
+		"       display: inline-block;\n" +
+		"       transform: translateY(50px);\n" +
+		"   }\n\n" +
+		"   #mission .text {\n" +
+		"       font: 24px \"Comic Sans MS\", sans-serif;\n" +
+		"   }\n\n" +
+		"   .text-wrapper {\n" +
+		"       width: calc(50% - 10px);\n" +
+		"       vertical-align: middle;\n" +
+		"       margin-right: 5px;\n" +
+		"   }\n\n" +
+		"   #mission .text-wrapper {\n" +
+		"       float: left;\n" +
+		"   }\n\n" +
+		"   #mission .text-wrapper .text {\n" +
+		"       float: right;\n" +
+		"       transform: translateY(50%);\n" +
+		"   }\n\n" +
+		"   #about-us .text-wrapper {\n" +
+		"       float: right;\n" +
+		"   }\n\n" +
+		"   #about-us .text-wrapper .text {\n" +
+		"       float: left;\n" +
+		"       transform: translateY(50%);\n" +
+		"   }\n\n" +
+		"   .img-wrapper {\n" +
+		"       width: calc(50% - 10px);\n" +
+		"       margin-left: 5px;\n" +
+		"   }\n\n" +
+		"   #mission .img-wrapper {\n" +
+		"       float: right;\n" +
+		"   }\n\n\n" +
+		"   #mission .img-wrapper .img {\n" +
+		"       float: left;\n" +
+		"   }\n\n" +
+		"   #about-us .img-wrapper {\n" +
+		"       float: left\n" +
+		"   }\n\n" +
+		"   #about-us .img-wrapper .img {\n" +
+		"       float: right;\n" +
+		"   }\n\n" +
+		"   .clickable {\n" +
+		"       cursor: pointer;\n" +
+		"   }\n\n" +
+		"   #about-us {\n" +
+		"       height: 300px;\n" +
+		"   }\n\n" +
+		"   #about-us .text {\n" +
+		"       font: 24px \"Comic Sans MS\", sans-serif;\n" +
+		"       color: #fff;\n" +
+		"   }\n\n" +
+		"   .button-wrapper {\n" +
+		"       margin: 20px;\n" +
+		"   }\n\n" +
+		"   .button-wrapper div {\n" +
+		"       width: max-content;\n" +
+		"   }\n\n" +
+		"   #sidenav {\n" +
+		"       font: 18px \"Times New Roman\";\n" +
+		"   }\n" +
+		"   \n" +
+		"   .clickable * {\n" +
+		"       cursor: inherit;\n" +
+		"   }\n\n</style>")
+}
+
 func init() {
 	ctx = context.Background()
 
 	fm := template.FuncMap{
-		"time": getTime,
+		"time":   getTime,
+		"navbar": createNavbar,
 	}
 
 	tpls = template.Must(template.New("").Funcs(fm).ParseGlob("templates/*.gotpls"))
@@ -169,6 +355,9 @@ func main() {
 	mux.HandleFunc("/proofos/", proofos)
 	mux.HandleFunc("/aboutus/", func(w http.ResponseWriter, req *http.Request) {
 		tpls.ExecuteTemplate(w, "aboutus.gohtml", nil)
+	})
+	mux.HandleFunc("/testpage/", func(w http.ResponseWriter, req *http.Request) {
+		check(tpls.ExecuteTemplate(w, "testpage.gohtml", nil))
 	})
 	mux.HandleFunc("/time/", serveTime)
 	mux.HandleFunc("/favicon.ico", favicon)

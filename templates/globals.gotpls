@@ -1,18 +1,38 @@
 {{define "gtag"}}
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-144904340-1"></script>
-<script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'UA-144904340-1');//
-</script>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-144904340-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+        gtag('config', 'UA-144904340-1');//
+    </script>
 {{end}}
 
 {{define "globalcss"}}
     <style>
+        * {
+            cursor: default;
+        }
+
         body {
             margin: 0px;
+        }
+
+        body::-webkit-scrollbar {
+            display: none;
+        }
+
+        .clickable {
+            cursor: pointer;
+        }
+
+        .clickable * {
+            cursor: inherit;
         }
     </style>
 {{end}}
@@ -20,13 +40,152 @@
 {{define "globalscripts"}}
 {{end}}
 
-{{define "globalhead"}}
-<head>
-    <meta charset="UTF-8">
-    <link rel="icon" type="image/ico" href="favicon.ico">
-    <title>{{.}}</title>
-    {{template "gtag"}}
-    {{template "globalcss"}}
+{{define "globals"}}
     {{template "globalscripts"}}
-</head>
+    {{template "globalcss"}}
+{{end}}
+
+{{define "globalhead"}}
+    <head>
+        <meta charset="UTF-8">
+        <link rel="icon" type="image/ico" href="favicon.ico">
+        <title>{{.}}</title>
+        {{template "gtag"}}
+        {{template "globalcss"}}
+        {{template "globalscripts"}}
+    </head>
+{{end}}
+
+{{define "navbarconstructor"}}
+    <style>
+
+        #navbar {
+            --background: #ff2020;
+            --text-color: #ffffff;
+            --text-hover-color: #cccccc;
+        }
+
+        #navbar {
+            background-color: var(--background);
+            padding: 20px;
+            min-height: 32px;
+            width: calc(100% - 20px);
+            position: fixed;
+            z-index: 999;
+        }
+
+        #navbar .element {
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        #navbar .element #sidenav-button {
+            display: inline-block;
+            margin-right: 20px;
+        }
+
+        #navbar .element #sidenav-button * {
+            width: 20px;
+            height: 3px;
+            background-color: var(--text-color);
+            margin: 4px 0;
+            transition: transform 0.5s, opacity 0.5s;
+            cursor: inherit;
+        }
+
+        #navbar .element #sidenav-button:hover * {
+            background-color: var(--text-hover-color);
+        }
+
+        #navbar .element .text {
+            font-size: x-large;
+            margin-right: 20px;
+            color: var(--text-color);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        #navbar #nav .text {
+            float: right;
+        }
+
+        #navbar #account {
+            float: right;
+        }
+
+        #sidenav-button.change #bar1 {
+            transform: translate(0px, 7px) rotate(-45deg);
+        }
+
+        #sidenav-button.change #bar2 {
+            opacity: 0;
+        }
+
+        #sidenav-button.change #bar3 {
+            transform: translate(0px, -7px) rotate(45deg);
+        }
+
+        #navbar .element div.text:hover {
+            color: var(--text-hover-color);
+        }
+
+        #sidenav {
+            z-index: 999;
+            transition: 0.5s;
+            background-color: #222222;
+            opacity: 80%;
+            height: calc(100% - 72px);
+            position: fixed;
+            text-align: center;
+            bottom: 0;
+            overflow-x: hidden;
+        }
+
+        #sidenav * {
+            opacity: 0;
+            z-index: 2;
+            transition: opacity 0.3s;
+            color: #ffffff;
+        }
+
+        #sidenav.change * {
+            opacity: 100%;
+        }
+
+        #sidenav {
+            font: 18px "Times New Roman";
+        }
+    </style>
+    <script>
+        function toggleSideNav() {
+            document.getElementById("sidenav").style.width = (document.getElementById("sidenav").style.width === "0px") ? "250px" : "0";
+            document.getElementById("sidenav-button").classList.toggle("change");
+            document.getElementById("sidenav").classList.toggle("change");
+        }
+    </script>
+    <div id="navbar">
+        <div id="nav" class="element">
+            <div id="sidenav-button" onclick="toggleSideNav();" class="clickable">
+                <div id="bar1"></div>
+                <div id="bar2"></div>
+                <div id="bar3"></div>
+            </div>
+            <div id="game-nav" class="text clickable" onclick="window.location.href='/webgame/'">Game</div>
+            <div id="forum-nav" class="text clickable" onclick="window.location.href='/forum/'">Forum</div>
+            <div id="home-nav" class="text clickable" onclick="window.location.href='/home/'">Home</div>
+        </div>
+        <div id="account" class="element">
+            <div id="account-nav" class="text clickable" onclick="window.location.href='/account/'">{{if .}}<img src="/account/profilepicture" width="32px">{{else}}Login{{end}}</div>
+        </div>
+    </div>
+
+    <div id="sidenav" style="width: 0;">
+        <div class="button-wrapper">
+            <div onclick="window.location.href='#mission'" class="clickable">Mission</div>
+        </div>
+        <div class="button-wrapper">
+            <div onclick="window.location.href='#about-us'" class="clickable">About Us</div>
+        </div>
+    </div>
+    <div style="height: 72px"></div>
 {{end}}

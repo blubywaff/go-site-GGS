@@ -196,8 +196,15 @@ func account(w http.ResponseWriter, req *http.Request) {
 
 		username := getUser(w, req).Username
 
-		f, finfo, err := req.FormFile("file")
-		if err != nil {
+		//fmt.Println(ioutil.ReadAll(req.Body))
+		//bitties, err := ioutil.ReadAll(req.Body)
+		//ioutil.WriteFile("dump.file", bitties, 0644)
+
+		f, finfo, err := req.FormFile("file") //TODO fix this to receive ajax instead
+		//bis, err := ioutil.ReadAll(f)
+		fmt.Println(finfo.Filename)
+		//ioutil.WriteFile("dump2.file", bis, 0644)
+		if !check(err) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -208,27 +215,32 @@ func account(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		bs, err := ioutil.ReadAll(f)
+		bs, err := /*ioutil.ReadAll(req.Body)*/ ioutil.ReadAll(f)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		bs, err = processImage(bs, finfo.Filename)
+		/*bs, err = processImage(bs, "pictura.png")*/
 		if !check(err) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 
 		if !containsProfilePicture(username) {
 			writeProfilePicture(username, bs)
+			http.Error(w, "Added Picture", http.StatusOK)
 		} else {
 			updateProfilePicture(username, bs)
+			http.Error(w, "Updated Picture", http.StatusOK)
 		}
+
+		return
 
 	}
 
 	if hasSession(w, req) {
-		tpls.ExecuteTemplate(w, "account.gohtml", getUser(w, req))
+		check(tpls.ExecuteTemplate(w, "account.gohtml", getUser(w, req)))
 	} else {
 		http.Redirect(w, req, "/login/", http.StatusSeeOther)
 	}

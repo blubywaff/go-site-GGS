@@ -2,27 +2,207 @@
 <html>
 {{template "globalhead" "Account"}}
 
+{{template "globals" ""}}
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<style>
+
+    #navbar {
+        --background: #ff2020;
+        --text-color: #ffffff;
+        --text-hover-color: #cccccc;
+    }
+
+    #navbar {
+        background-color: var(--background);
+        padding: 20px;
+        min-height: 32px;
+        width: calc(100% - 20px);
+        position: fixed;
+        z-index: 999;
+    }
+
+    #navbar .element {
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    #navbar .element #sidenav-button {
+        display: inline-block;
+        margin-right: 20px;
+    }
+
+    #navbar .element #sidenav-button * {
+        width: 20px;
+        height: 3px;
+        background-color: var(--text-color);
+        margin: 4px 0;
+        transition: transform 0.5s, opacity 0.5s;
+        cursor: inherit;
+    }
+
+    #navbar .element #sidenav-button:hover * {
+        background-color: var(--text-hover-color);
+    }
+
+    #navbar .element .text {
+        font-size: x-large;
+        margin-right: 20px;
+        color: var(--text-color);
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    #navbar #nav .text {
+        float: right;
+    }
+
+    #navbar #account {
+        float: right;
+    }
+
+    #sidenav-button.change #bar1 {
+        transform: translate(0px, 7px) rotate(-45deg);
+    }
+
+    #sidenav-button.change #bar2 {
+        opacity: 0;
+    }
+
+    #sidenav-button.change #bar3 {
+        transform: translate(0px, -7px) rotate(45deg);
+    }
+
+    #navbar .element div.text:hover {
+        color: var(--text-hover-color);
+    }
+
+    #sidenav {
+        z-index: 999;
+        transition: 0.5s;
+        background-color: #222222;
+        opacity: 80%;
+        height: calc(100% - 72px);
+        position: fixed;
+        text-align: center;
+        bottom: 0;
+        overflow-x: hidden;
+    }
+
+    #sidenav * {
+        opacity: 0;
+        z-index: 2;
+        transition: opacity 0.3s;
+        color: #ffffff;
+    }
+
+    #sidenav.change * {
+        opacity: 100%;
+    }
+
+    #sidenav {
+        font: 18px "Times New Roman";
+    }
+
+    #title-name {
+        font-size: 32px;
+        text-align: center;
+    }
+
+    #title-name {
+        color: #0000ff;
+        background-color: #00ddff;
+        border: 3px solid #000000;
+    }
+</style>
+<script>
+    function toggleSideNav() {
+        document.getElementById("sidenav").style.width = (document.getElementById("sidenav").style.width === "0px") ? "250px" : "0";
+        document.getElementById("sidenav-button").classList.toggle("change");
+        document.getElementById("sidenav").classList.toggle("change");
+    }
+</script>
+<div id="navbar">
+    <div id="nav" class="element">
+        <div id="sidenav-button" onclick="toggleSideNav();" class="clickable">
+            <div id="bar1"></div>
+            <div id="bar2"></div>
+            <div id="bar3"></div>
+        </div>
+        <div id="game-nav" class="text clickable" onclick="window.location.href='/webgame/'">Game</div>
+        <div id="forum-nav" class="text clickable" onclick="window.location.href='/forum/'">Forum</div>
+        <div id="home-nav" class="text clickable" onclick="window.location.href='/home/'">Home</div>
+    </div>
+    <div id="account" class="element">
+        <div id="account-nav" class="text clickable" onclick="window.location.href='/account/'">{{if .}}<img src="/account/profilepicture" width="32px">{{else}}Login{{end}}</div>
+    </div>
+</div>
+
+<div id="sidenav" style="width: 0;">
+    <div class="button-wrapper">
+        <div onclick="window.location.href='#mission'" class="clickable">Mission</div>
+    </div>
+    <div class="button-wrapper">
+        <div onclick="window.location.href='#about-us'" class="clickable">About Us</div>
+    </div>
+</div>
+<div style="height: 72px"></div>
+
+<style>
+
+</style>
+
+<div id="title-wrapper">
+    <div id="title-name">Username</div>
+</div>
+</body>
+
+
 <body>
-    <p>Username: {{.Username}}</p><br>
-    <p>Email: {{.Email}}</p><br>
-    <p>Name: {{.Firstname}} {{.Lastname}}</p><br>
-    <img src="/account/profilepicture">
-    <form method="POST" enctype="multipart/form-data" id="profile-form">
-        <label for="idx-f">Update Profile Picture</label><br>
-        <input type="file" id="idx-f" name="file"><br>
-        <input type="submit" value="Update"><br>
-        <p id="fileError"></p>
-    </form>
-    
+<div id="content">
+    <div id="username">
+        <div class="display">Current Username: <b>{{.Username}}</b></div>
+        <div class="edit">
+            <form style="display: inline-block">
+                <input type="text" placeholder="New Username">
+            </form>
+            <button id="submit">Update</button>
+        </div>
+    </div>
+    <div id="personal">
+        <div class="display">Email: <b>{{.Email}}</b></div>
+        <div class="edit">
+            <form>
+                <input type="email" placeholder="New Email">
+            </form>
+            <button id="submit">Update</button>
+        </div>
+        <div class="display">Name: <b>{{.Firstname}} {{.Lastname}}</b></div>
+    </div>
+    <div id="account">
+        <button id="getdata">Get Data</button>
+        <button id="delete">Delete Account</button>
+        <p>Deleting your account will also permanently remove all of your stored data!</p>
+    </div>
+</div>
+<p>Username: {{.Username}}</p><br>
+<p>Email: {{.Email}}</p><br>
+<p>Name: {{.Firstname}} {{.Lastname}}</p><br>
+<img src="/account/profilepicture">
+<form method="POST" enctype="multipart/form-data" id="profile-form">
+    <input type="file" id="idx-f" name="file">
+</form>
+<button id="submit" onclick="fileHandle()">Update</button>
+
 </body>
 <body>
 <script>
     var fileError = document.querySelector('#fileError');
     var form = document.querySelector('#profile-form');
 
-    form.addEventListener('submit', function(e){
-        e.preventDefault();
-        if(!window.FileReader) {
+    function fileHandle() {
+        if (!window.FileReader) {
             fileError.textContent = "Javascript Error: FileReader";
             return;
         }
@@ -30,22 +210,46 @@
         var input = document.getElementById('idx-f');
         if (!input) {
             fileError.textContent = "Javascript Error: input";
-        }
-        else if (!input.files) {
+        } else if (!input.files) {
             fileError.textContent = "Javascript Error: input files";
-        }
-        else if (!input.files[0]) {
+        } else if (!input.files[0]) {
             fileError.textContent = "Input a file";
-        }
-        else {
+        } else {
             var file = input.files[0];
-            if(file.name.toLowerCase().endsWith(".png") || file.name.toLowerCase().endsWith(".jpg")) {
-                form.submit();
+            console.log(file);
+            if (file.name.toLowerCase().endsWith(".png") || file.name.toLowerCase().endsWith(".jpg")) {
+                sendFile(file);
             } else {
                 fileError.textContent = "Input a png or jpg";
             }
         }
-    });
+    }
+    function sendFile(file) {
+        /*var xmlRequest = new XMLHttpRequest();
+        xmlRequest.open('POST', '/account/', true);
+        xmlRequest.overrideMimeType("multipart/form-data; charset=x-user-defined");
+        xmlRequest.
+        xmlRequest.addEventListener('readystatechange', function(){
+            if(xmlRequest.readyState === XMLHttpRequest.DONE && xmlRequest.status === 200) {
+                var res = xmlRequest.responseText;
+                console.log(res);
+            }
+        });
+        var fd = new FormData().append("file", file);
+        xmlRequest.send(fd);*/
+        var formdata = new FormData();
+        formdata.append('file', file);
+        $.ajax({
+            url: '/account/',
+            data: formdata,
+            type: 'POST',
+            contentType: false,
+            processData: false,
+            success: function(result){
+                console.log(result);
+            }
+        });
+    }
 </script>
 </body>
 </html>
