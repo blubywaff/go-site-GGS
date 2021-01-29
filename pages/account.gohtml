@@ -180,17 +180,13 @@
     <div class="section-head">Username</div>
     <div id="username">
         <div class="display">Current Username: <b>{{.Username}}</b></div>
-        <div class="edit">
-            <input type="text" placeholder="New Username">
-            <button id="submit">Update</button>
-        </div>
     </div>
     <div class="section-head">Personal</div>
     <div id="personal">
         <div class="display">Email: <b>{{.Email}}</b></div>
         <div class="edit">
-            <input type="email" placeholder="New Email">
-            <button id="submit">Update</button>
+            <input type="email" id="email-edit" placeholder="New Email">
+            <button id="submit" onclick="$.ajax({url:'/account/', type: 'POST', data:'email ' + document.getElementById('email-edit').value, success: function(result){console.log(result);}});">Update</button>
         </div>
         <div class="display">Name: <b>{{.Firstname}} {{.Lastname}}</b></div>
     </div>
@@ -208,7 +204,7 @@
     </div>
     <div class="section-head">Account</div>
     <div id="account">
-        <button id="delete">Delete Account</button>
+        <button id="delete" onclick="$.ajax({url:'/account/delete', type: 'POST', data: 'delete', success: function(result) {console.log(result);setTimeout(function(){location.reload();}, 10000)}});">Delete Account</button>
         <p>Deleting your account will also permanently remove all of your stored data!</p>
     </div>
 </div>
@@ -258,7 +254,7 @@
         var formdata = new FormData();
         formdata.append('file', file);
         $.ajax({
-            url: '/account/',
+            url: '/account/profilepicture/',
             data: formdata,
             type: 'POST',
             contentType: false,

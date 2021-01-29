@@ -191,6 +191,32 @@ func account(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodPost {
 		if !hasSession(w, req) {
 			http.Error(w, "Requires Valid Session", http.StatusForbidden)
+		}
+
+		bs, _ := ioutil.ReadAll(req.Body)
+		str := string(bs)
+		usr := getUser(w, req)
+		usr.Email = str[6:]
+		updateUser(bson.D{{"Username", usr.Username}}, bson.D{{"$set", bson.D{{"Email", usr.Email}}}})
+		http.Error(w, "Updated "+usr.Username+" to email "+usr.Email, http.StatusOK)
+		return
+	}
+
+	if hasSession(w, req) {
+		check(tpls.ExecuteTemplate(w, "account.gohtml", getUser(w, req)))
+	} else {
+		http.Redirect(w, req, "/login/", http.StatusSeeOther)
+	}
+}
+
+func checkFile(name string) bool {
+	return strings.HasSuffix(strings.ToLower(name), ".png") || strings.HasSuffix(strings.ToLower(name), ".jpg")
+}
+
+func profilePicture(w http.ResponseWriter, req *http.Request) {
+	if req.Method == http.MethodPost {
+		if !hasSession(w, req) {
+			http.Error(w, "Requires Valid Session", http.StatusForbidden)
 			return
 		}
 
@@ -240,18 +266,6 @@ func account(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if hasSession(w, req) {
-		check(tpls.ExecuteTemplate(w, "account.gohtml", getUser(w, req)))
-	} else {
-		http.Redirect(w, req, "/login/", http.StatusSeeOther)
-	}
-}
-
-func checkFile(name string) bool {
-	return strings.HasSuffix(strings.ToLower(name), ".png") || strings.HasSuffix(strings.ToLower(name), ".jpg")
-}
-
-func profilePicture(w http.ResponseWriter, req *http.Request) {
-	if hasSession(w, req) {
 		http.ServeContent(w, req, "profile", time.Now(), bytes.NewReader(readProfilePicture(getUser(w, req).Username)))
 	} else {
 		http.NotFoundHandler()
@@ -282,4 +296,12 @@ func processImage(bs []byte, name string) ([]byte, error) {
 		return nil, err
 	}
 	return buffer.Bytes(), nil
+}
+
+func deleteAccount(w http.ResponseWriter, req *http.Request) {
+	usr := getUser(w, req).Username
+	removeUser(bson.D{{"Username", usr}})
+	removeSession(bson.D{{"Username", usr}})
+	http.SetCookie(w, &http.Cookie{Name: "session", Value: "", MaxAge: 1, Path: "/"})
+	http.Error(w, "Removed account "+usr, http.StatusOK)
 }

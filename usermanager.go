@@ -31,8 +31,8 @@ func removeUser(filter bson.D) {
 	check(res.Err())
 }
 
-func updateUser(filter bson.D, user user) {
-	_, err := usersdb.UpdateOne(ctx, filter, user)
+func updateUser(filter bson.D, update bson.D) {
+	_, err := usersdb.UpdateOne(ctx, filter, update)
 	check(err)
 }
 

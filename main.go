@@ -367,9 +367,10 @@ func main() {
 	mux.HandleFunc("/signup/", signUp)
 	mux.HandleFunc("/login/", login)
 	mux.HandleFunc("/logout/", logout)
-	mux.HandleFunc("/signup/checkusername", checkUsername)
+	mux.HandleFunc("/signup/checkusername/", checkUsername)
 	mux.HandleFunc("/account/", account)
-	mux.HandleFunc("/account/profilepicture", profilePicture)
+	mux.HandleFunc("/account/profilepicture/", profilePicture)
+	mux.HandleFunc("/account/delete/", deleteAccount)
 	mux.HandleFunc("/forum/", forum)
 	mux.HandleFunc("/thread/", forumThread)
 	mux.HandleFunc("/createthread/", createThread)
@@ -393,6 +394,11 @@ func main() {
 		//fmt.Println("cerr", err)
 		//fmt.Println(req.URL.Path)
 		if err == nil {
+			if c.Value == "" {
+				http.SetCookie(w, &http.Cookie{Name: "session", Value: "", MaxAge: 1, Path: "/"})
+				http.Error(w, "Empty Session", http.StatusForbidden)
+				return
+			}
 			http.SetCookie(w, &http.Cookie{Name: "session", Value: c.Value, MaxAge: sessionLength, Path: "/"})
 			updateSession(bson.D{{Key: "SessionID", Value: c.Value}}, bson.D{{Key: "$set", Value: bson.D{{Key: "LastActivity", Value: time.Now().Format(dbTimeFormat)}}}})
 		}
