@@ -226,7 +226,7 @@ func profilePicture(w http.ResponseWriter, req *http.Request) {
 		//bitties, err := ioutil.ReadAll(req.Body)
 		//ioutil.WriteFile("dump.file", bitties, 0644)
 
-		f, finfo, err := req.FormFile("file") //TODO fix this to receive ajax instead
+		f, finfo, err := req.FormFile("file")
 		//bis, err := ioutil.ReadAll(f)
 		fmt.Println(finfo.Filename)
 		//ioutil.WriteFile("dump2.file", bis, 0644)
@@ -302,6 +302,7 @@ func deleteAccount(w http.ResponseWriter, req *http.Request) {
 	usr := getUser(w, req).Username
 	removeUser(bson.D{{"Username", usr}})
 	removeSession(bson.D{{"Username", usr}})
+	removeProfilePicture(usr)
 	http.SetCookie(w, &http.Cookie{Name: "session", Value: "", MaxAge: 1, Path: "/"})
 	http.Error(w, "Removed account "+usr, http.StatusOK)
 }

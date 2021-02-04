@@ -1,21 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Login</title>
-<head>
+{{template "globalhead" "login"}}
+{{template "globals" ""}}
+
+
+
+<style>
+
+    #navbar {
+        --background: #ff2020;
+        --text-color: #ffffff;
+        --text-hover-color: #cccccc;
+    }
+
+    #navbar {
+        background-color: var(--background);
+        padding: 20px;
+        min-height: 32px;
+        width: calc(100% - 20px);
+        position: fixed;
+        z-index: 999;
+    }
+
+    #navbar .element {
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    #navbar .element #sidenav-button {
+        display: inline-block;
+        margin-right: 20px;
+    }
+
+    #navbar .element #sidenav-button * {
+        width: 20px;
+        height: 3px;
+        background-color: var(--text-color);
+        margin: 4px 0;
+        transition: transform 0.5s, opacity 0.5s;
+        cursor: inherit;
+    }
+
+    #navbar .element #sidenav-button:hover * {
+        background-color: var(--text-hover-color);
+    }
+
+    #navbar .element .text {
+        font-size: x-large;
+        margin-right: 20px;
+        color: var(--text-color);
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    #navbar #nav .text {
+        float: right;
+    }
+
+    #navbar #account {
+        float: right;
+    }
+
+    #sidenav-button.change #bar1 {
+        transform: translate(0px, 7px) rotate(-45deg);
+    }
+
+    #sidenav-button.change #bar2 {
+        opacity: 0;
+    }
+
+    #sidenav-button.change #bar3 {
+        transform: translate(0px, -7px) rotate(45deg);
+    }
+
+    #navbar .element div.text:hover {
+        color: var(--text-hover-color);
+    }
+
+    #sidenav {
+        z-index: 999;
+        transition: 0.5s;
+        background-color: #222222;
+        opacity: 80%;
+        height: calc(100% - 72px);
+        position: fixed;
+        text-align: center;
+        bottom: 0;
+        overflow-x: hidden;
+    }
+
+    #sidenav * {
+        opacity: 0;
+        z-index: 2;
+        transition: opacity 0.3s;
+        color: #ffffff;
+    }
+
+    #sidenav.change * {
+        opacity: 100%;
+    }
+
+    #sidenav {
+        font: 18px "Times New Roman";
+    }
+
+    #title-name {
+        font-size: 32px;
+        text-align: center;
+    }
+
+    #title-name {
+        color: #0000ff;
+        background-color: #00ddff;
+        border: 3px solid #000000;
+    }
+</style>
+<script>
+    function toggleSideNav() {
+        document.getElementById("sidenav").style.width = (document.getElementById("sidenav").style.width === "0px") ? "250px" : "0";
+        document.getElementById("sidenav-button").classList.toggle("change");
+        document.getElementById("sidenav").classList.toggle("change");
+    }
+</script>
+<div id="navbar">
+    <div id="nav" class="element">
+        <div id="sidenav-button" onclick="toggleSideNav();" class="clickable">
+            <div id="bar1"></div>
+            <div id="bar2"></div>
+            <div id="bar3"></div>
+        </div>
+        <div id="game-nav" class="text clickable" onclick="window.location.href='/webgame/'">Game</div>
+        <div id="forum-nav" class="text clickable" onclick="window.location.href='/forum/'">Forum</div>
+        <div id="home-nav" class="text clickable" onclick="window.location.href='/home/'">Home</div>
+    </div>
+    <div id="account" class="element">
+        <div id="account-nav" class="text clickable" onclick="window.location.href='/account/'">{{if .}}<img src="/account/profilepicture" width="32px">{{else}}Login{{end}}</div>
+    </div>
+</div>
+
+<div id="sidenav" style="width: 0;">
+    <div class="button-wrapper">
+        <div onclick="window.location.href='#mission'" class="clickable">Mission</div>
+    </div>
+    <div class="button-wrapper">
+        <div onclick="window.location.href='#about-us'" class="clickable">About Us</div>
+    </div>
+</div>
+<div style="height: 72px"></div>
+
+<style>
+    #content {
+        text-align: center;
+        background-color: #424242;
+    }
+    #content .display {
+        font-size: 18px;
+        color: #dddddd;
+        margin-block: 10px;
+    }
+    .section-head {
+        font-size: 24px;
+        color: green;
+        margin-top: 20px;
+    }
+</style>
+
+<div id="title-wrapper">
+    <div id="title-name">Log In</div>
+</div>
+</body>
+
+
 <body>
-
-<form method="post">
-
+<div id="content">
+<form method="post" id="login-form">
+    <div class="section-head">Username</div>
     <input type="text" name="username" placeholder="username"><br>
+    <div class="section-head">Password</div>
     <input type="password" name="password" placeholder="password"><br>
-    <label for="login">Login</label>
-    <input type="submit" id="login">
-
 </form>
 
-<h2><a href="/signup">signup</a></h2>
+<button id="submit" onclick="var formdata = new FormData($('form#login-form')[0]);$.ajax({data: formdata, url: '/login/', type: 'POST', contentType: false, processData: false, success: function(result){console.log(result);setTimeout(function(){location.reload();}, 1000);}});">Login</button>
+</div>
+
+<p>Don't have an account? <a href="/signup">signup</a></p>
 
 </body>
 </html>
