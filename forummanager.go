@@ -108,6 +108,28 @@ type Votes struct {
 }
 
 func getForumData() FormData {
+	if SUPER_DEBUG_MODE_OVERRIDE {
+		fd := FormData{}
+		fd.Top = append(fd.Top, Thread{
+			Poster:   "DEBUG_ACCOUNT",
+			Title:    "DEBUG !",
+			PostTime: time.Time{},
+			ID:       "DEBUG_IMPOSSIBLE_ID_THIS_SHOULD_STILL_WORK",
+			Body:     "hello this is a test debug message, it should be impossible to see this unless the server is in debug mode",
+			Score:    -21,
+			Replies:  nil,
+		}, Thread{
+			Poster:   "DEBUG_ACCOUNT",
+			Title:    "DEBUG POST 2",
+			PostTime: time.Time{},
+			ID:       "DEBUG_IMPOSSIBLE_NUMBER_2",
+			Body:     "hi hi hi hi hi hi this is a useleess post hi hi hi hi hi hi hi hi hi hi hi hi hi hi hi hi hi hi hi hi hi",
+			Score:    7777777777777777777,
+			Replies:  nil,
+		})
+		return fd
+	}
+
 	cursor, err := threadsdb.Aggregate(ctx, mongo.Pipeline{
 		bson.D{
 			{"$match", bson.D{

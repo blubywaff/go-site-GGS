@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 {{template "globalhead" "Forum"}}
+{{template "globals" ""}}
 
 <style>
     * {
@@ -121,11 +122,19 @@
 
 </div>
 
+<style>
+    #tops {
+        padding: 10px;
+    }
+</style>
+
+{{template "threadwidgetcss"}}
+
 <div id="tops">
     {{if .Top}}
         {{range $t := .Top}}
             {{template "threadwidget" $t}}
-        {{end}}h
+        {{end}}
     {{else}}
         <h1>its quiet here</h1>
     {{end}}

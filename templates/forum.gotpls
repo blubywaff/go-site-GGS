@@ -1,5 +1,5 @@
 {{define "comment"}}
-<br>
+<br xmlns="http://www.w3.org/1999/html">
 <p>{{.Score}} -- {{.Poster}} --- {{.PostTime}}</p>
 <p><a href="/forum/vote/?comment={{.ID}}&vote=1">++</a><a href="/forum/vote/?comment={{.ID}}&vote=-1">--</a></p>
 <p>{{.Content}}</p>
@@ -21,7 +21,36 @@
 {{end}}
 
 {{define "threadwidget"}}
-<br>
-<p>{{.Poster}} --- {{.PostTime}}</p>
-<h1>{{.Score}} | <a href="/thread/?thread={{.ID}}">{{.Title}}</a></h1>
+<div class="widget">
+    <div class="posterlink" onlclick="window.location.href=/forum/user/{{.Poster}}">{{.Poster}}</div>
+    <div class="posttime">{{timeify .PostTime}}</div><br>
+    <div class="postscore">{{shortify .Score}}</div>
+    <div class="posttitle">{{.Title}}</div>
+</div>
+{{end}}
+
+{{define "threadwidgetcss"}}
+    <style>
+        .widget {
+            padding: 5px;
+            font: 12px "Calibri";
+            background: #424242;
+        }
+        .widget div {
+            color: #eeeeee;
+            display: inline-block;
+        }
+        .widget .posterlink {
+            color: #aaaaaa
+        }
+        .widget .posttime:hover {
+            color: #aaaaaa
+        }
+        .widget .postscore {
+            font: 14px "Arial Black"
+        }
+        .widget .posttitle {
+            font: 18px "Times New Roman"
+        }
+    </style>
 {{end}}
