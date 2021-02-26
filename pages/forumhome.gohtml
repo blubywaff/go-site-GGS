@@ -128,7 +128,125 @@
     }
 </style>
 
+<style>
+    .dropbtn {
+        background-color: #3498DB;
+        color: white;
+        padding: 16px;
+        font-size: 16px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .dropbtn:hover, .dropbtn:focus {
+        background-color: #2980B9;
+    }
+
+    .time {
+        position: relative;
+        display: inline-block;
+    }
+
+    .numpage {
+        position: relative;
+        display: inline-block;
+    }
+
+    .dropdown {
+        display: none;
+        position: absolute;
+        background-color: #f1f1f1;
+        min-width: 160px;
+        box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+        z-index: 1;
+    }
+
+    .dropdown * {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+    }
+
+    .dropdown *:hover {
+        background-color: #dddddd
+    }
+
+    .show {
+        display:block;
+    }
+</style>
+
+<script>
+    var time = 0;
+    var num = 20;
+
+    function update() {
+        $.ajax({
+            url: '/forum/data/?time='+time+'&num='+num+'&page=0',
+            type: 'GET',
+            success: function (result) {
+                console.log(result);
+                var forumData = JSON.parse(result);
+                console.log(forumData);
+                for(forum )
+                $('#tops')[0].innerHTML = "<div class='widget'>" +
+                    "<div class='posterlink' onclick='window.location.href=\'/forum/user/POSTER\''>POSTER</div>" +
+                    "<div class='posttime'>POSTTIME</div><br>" +
+                    "<div class='postscore'>SCORE</div>" +
+                    "<div class='posttitle'>TITLE</div>" +
+                    "</div>";
+            }
+        });
+    }
+</script>
+
+<script>
+    window.onload = function(event) {
+        update();
+    }
+
+    window.onclick = function(event) {
+        if(!event.target.matches('.dropbtn')) {
+            let menus = $('.dropdown');
+            for(let i = 0; i < menus.length; i++) {
+                menus[i].classList.remove('show');
+            }
+        } else {
+            let menus = $('.dropdown');
+            for(let i = 0; i < menus.length; i++) {
+                if(menus[i].parentNode !== event.target.parentNode) {
+                    menus[i].classList.remove('show');
+                }
+            }
+        }
+    }
+</script>
+
 {{template "threadwidgetcss"}}
+
+<div id="options">
+    <div class="time">
+        <div class="dropbtn" onclick="$('.dropdown')[0].classList.toggle('show')">Time</div>
+        <div class="dropdown">
+            <div class="time-sel" onclick="time=0;">Day</div>
+            <div class="time-sel" onclick="time=1;">Week</div>
+            <div class="time-sel" onclick="time=2;">Month</div>
+            <div class="time-sel" onclick="time=3;">Year</div>
+            <div class="time-sel" onclick="time=4;">Ever</div>
+        </div>
+    </div>
+    <div class="numpage">
+        <div class="dropbtn" onclick="$('.dropdown')[1].classList.toggle('show')"># Per Page</div>
+        <div class="dropdown">
+            <div class="num-sel" onclick="num=10;">10</div>
+            <div class="num-sel" onclick="num=20;">20</div>
+            <div class="num-sel" onclick="num=30;">30</div>
+            <div class="num-sel" onclick="num=40;">40</div>
+            <div class="num-sel" onclick="num=50;">50</div>
+        </div>
+    </div>
+</div>
 
 <div id="tops">
     {{if .Top}}

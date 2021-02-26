@@ -304,6 +304,7 @@ func main() {
 	mux.HandleFunc("/webgame/training/", training)
 	mux.HandleFunc("/webgame/details/", gamedetails)
 	mux.HandleFunc("/webgame/raid/", gameraid)
+	mux.HandleFunc("/forum/data/", forumData)
 
 	mux.HandleFunc("/test", test)
 	mux.HandleFunc("/test2", test2)

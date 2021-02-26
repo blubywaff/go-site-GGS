@@ -92,7 +92,7 @@ func (comment Comment) getFull() FullComment {
 	return full
 }
 
-type FormData struct {
+type ForumData struct {
 	Top []Thread `bson:"Top"`
 }
 
@@ -107,9 +107,9 @@ type Votes struct {
 	Votes    []Vote `bson:"Votes"`
 }
 
-func getForumData() FormData {
+func getForumData() ForumData {
 	if SUPER_DEBUG_MODE_OVERRIDE {
-		fd := FormData{}
+		fd := ForumData{}
 		fd.Top = append(fd.Top, Thread{
 			Poster:   "DEBUG_ACCOUNT",
 			Title:    "DEBUG !",
@@ -148,14 +148,65 @@ func getForumData() FormData {
 		},
 	})
 	if !check(err) {
-		return FormData{}
+		return ForumData{}
 	}
 	var m []bson.M
 	err = cursor.All(ctx, &m)
 	if !check(err) {
-		return FormData{}
+		return ForumData{}
 	}
-	var result FormData
+	var result ForumData
+	for _, bm := range m {
+		var t Thread
+		bb, _ := bson.Marshal(bm)
+		_ = bson.Unmarshal(bb, &t)
+		result.Top = append(result.Top, t)
+	}
+	return result
+}
+
+func getForums(timeWindow int, num int, page int) ForumData {
+	cursor, err := threadsdb.Aggregate(ctx, mongo.Pipeline{
+		bson.D{
+			{"$match", bson.D{
+				{"PostTime", bson.D{
+					{"$gte", func() time.Time {
+						if timeWindow == 0 {
+							return time.Now().Add(time.Hour * -24)
+						} else if timeWindow == 1 {
+							return time.Now().Add(time.Hour * -24 * 30)
+						} else if timeWindow == 2 {
+							return time.Now().Add(time.Hour * -24 * 365)
+						} else {
+							return time.Time{}
+						}
+					}()},
+				}},
+			}},
+		},
+		bson.D{
+			{"$sort", bson.D{
+				{"Score", -1},
+			}},
+		},
+		bson.D{
+			{"$sort", bson.D{
+				{"PostTime", -1},
+			}},
+		},
+		bson.D{
+			{"$limit", num},
+		},
+	})
+	if !check(err) {
+		return ForumData{}
+	}
+	var m []bson.M
+	err = cursor.All(ctx, &m)
+	if !check(err) {
+		return ForumData{}
+	}
+	var result ForumData
 	for _, bm := range m {
 		var t Thread
 		bb, _ := bson.Marshal(bm)

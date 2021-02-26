@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"net/http"
@@ -29,6 +31,23 @@ func forumThread(w http.ResponseWriter, req *http.Request) {
 	}
 
 	tpls.ExecuteTemplate(w, "thread.gohtml", getThread(threadID).getFull())
+}
+
+func forumData(w http.ResponseWriter, req *http.Request) {
+	if req.Method == http.MethodPost {
+		fmt.Fprint(w, "You can't send stuff here, silly!")
+		return
+	}
+	timeWindow := req.URL.Query()["time"]
+	num := req.URL.Query()["num"]
+	page := req.URL.Query()["page"]
+	if len(timeWindow) != 1 || len(num) != 1 || len(page) != 1 {
+		http.Error(w, "Invalid Parameters", http.StatusBadRequest)
+		return
+	}
+	single := func(i int, e error) int { return i }
+	s := func(i []byte, e error) []byte { return i }
+	fmt.Fprint(w, string(s(json.Marshal(getForums(single(strconv.Atoi(timeWindow[0])), single(strconv.Atoi(num[0])), single(strconv.Atoi(page[0])))))))
 }
 
 func createThread(w http.ResponseWriter, req *http.Request) {
