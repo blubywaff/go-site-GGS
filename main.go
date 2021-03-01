@@ -128,7 +128,7 @@ func userifyTime(timeIn time.Time) string {
 }
 
 func init() {
-	SUPER_DEBUG_MODE_OVERRIDE = os.Args[1] == "-debug"
+	//SUPER_DEBUG_MODE_OVERRIDE = os.Args[1] == "-debug"
 	if SUPER_DEBUG_MODE_OVERRIDE {
 		fmt.Println("Debug: Enabled")
 	}
@@ -342,7 +342,7 @@ func main() {
 	})
 
 	handleTimer := time.AfterFunc(time.Microsecond, func() {
-		log.Fatal(http.ListenAndServe(":80", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) { http.Redirect(w, req, "https://"+req.Host, 307) })))
+		//log.Fatal(http.ListenAndServe(":80", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) { http.Redirect(w, req, "https://"+req.Host, 307) })))
 	})
 	defer handleTimer.Stop()
 

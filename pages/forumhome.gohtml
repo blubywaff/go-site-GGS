@@ -102,26 +102,6 @@
     }
 </script>
 
-<div id="navbar">
-    <div id="nav" class="element">
-        <div id="sidenav-button" onclick="toggleSideNav();">
-            <div id="bar1"></div>
-            <div id="bar2"></div>
-            <div id="bar3"></div>
-        </div>
-        <div id="game-nav" class="text" onclick="window.location.href='/webgame/'">Game</div>
-        <div id="forum-nav" class="text" onclick="window.location.href='/forum/'">Forum</div>
-        <div id="home-nav" class="text" onclick="window.location.href='/home/'">Home</div>
-    </div>
-    <div id="account" class="element">
-        <div id="account-nav" class="text" onclick="window.location.href='/login/'">Login</div>
-    </div>
-</div>
-
-<div id="sidenav" style="width: 0;">
-
-</div>
-
 <style>
     #tops {
         padding: 10px;
@@ -189,13 +169,13 @@
                 console.log(result);
                 var forumData = JSON.parse(result);
                 console.log(forumData);
-                for(forum )
-                $('#tops')[0].innerHTML = "<div class='widget'>" +
-                    "<div class='posterlink' onclick='window.location.href=\'/forum/user/POSTER\''>POSTER</div>" +
-                    "<div class='posttime'>POSTTIME</div><br>" +
-                    "<div class='postscore'>SCORE</div>" +
-                    "<div class='posttitle'>TITLE</div>" +
-                    "</div>";
+                //for(forum )
+                    $('#tops')[0].innerHTML = "<div class='widget'>" +
+                        "<div class='posterlink' onclick='window.location.href=\"/forum/user/POSTER\"'>POSTER</div>" +
+                        "<div class='posttime'>POSTTIME</div><br>" +
+                        "<div class='postscore'>SCORE</div>" +
+                        "<div class='posttitle'>TITLE</div>" +
+                        "</div>";
             }
         });
     }
@@ -224,6 +204,26 @@
 </script>
 
 {{template "threadwidgetcss"}}
+
+<div id="navbar">
+    <div id="nav" class="element">
+        <div id="sidenav-button" onclick="toggleSideNav();">
+            <div id="bar1"></div>
+            <div id="bar2"></div>
+            <div id="bar3"></div>
+        </div>
+        <div id="game-nav" class="text" onclick="window.location.href='/webgame/'">Game</div>
+        <div id="forum-nav" class="text" onclick="window.location.href='/forum/'">Forum</div>
+        <div id="home-nav" class="text" onclick="window.location.href='/home/'">Home</div>
+    </div>
+    <div id="account" class="element">
+        <div id="account-nav" class="text" onclick="window.location.href='/login/'">Login</div>
+    </div>
+</div>
+
+<div id="sidenav" style="width: 0;">
+
+</div>
 
 <div id="options">
     <div class="time">
