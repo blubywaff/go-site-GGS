@@ -166,6 +166,7 @@ func getForumData() ForumData {
 }
 
 func getForums(timeWindow int, num int, page int) ForumData {
+	fmt.Println(timeWindow, num, page)
 	cursor, err := threadsdb.Aggregate(ctx, mongo.Pipeline{
 		bson.D{
 			{"$match", bson.D{
@@ -174,8 +175,10 @@ func getForums(timeWindow int, num int, page int) ForumData {
 						if timeWindow == 0 {
 							return time.Now().Add(time.Hour * -24)
 						} else if timeWindow == 1 {
-							return time.Now().Add(time.Hour * -24 * 30)
+							return time.Now().Add(time.Hour * -24 * 7)
 						} else if timeWindow == 2 {
+							return time.Now().Add(time.Hour * -24 * 30)
+						} else if timeWindow == 3 {
 							return time.Now().Add(time.Hour * -24 * 365)
 						} else {
 							return time.Time{}
@@ -187,15 +190,29 @@ func getForums(timeWindow int, num int, page int) ForumData {
 		bson.D{
 			{"$sort", bson.D{
 				{"Score", -1},
+				{"PostTime", -1},
+				{"_id", -1},
 			}},
 		},
 		bson.D{
+			{"$limit", num * (page + 1)},
+		},
+		bson.D{
 			{"$sort", bson.D{
-				{"PostTime", -1},
+				{"Score", 1},
+				{"PostTime", 1},
+				{"_id", 1},
 			}},
 		},
 		bson.D{
 			{"$limit", num},
+		},
+		bson.D{
+			{"$sort", bson.D{
+				{"Score", -1},
+				{"PostTime", -1},
+				{"_id", -1},
+			}},
 		},
 	})
 	if !check(err) {

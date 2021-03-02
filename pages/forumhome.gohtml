@@ -158,24 +158,32 @@
 </style>
 
 <script>
-    var time = 0;
+    var time = 3;
     var num = 20;
+    var page = 0;
+    var forumData;
 
     function update() {
         $.ajax({
-            url: '/forum/data/?time='+time+'&num='+num+'&page=0',
+            url: '/forum/data/?time='+time+'&num='+num+'&page='+page,
             type: 'GET',
             success: function (result) {
                 console.log(result);
-                var forumData = JSON.parse(result);
+                forumData = JSON.parse(result);
                 console.log(forumData);
-                //for(forum )
-                    $('#tops')[0].innerHTML = "<div class='widget'>" +
-                        "<div class='posterlink' onclick='window.location.href=\"/forum/user/POSTER\"'>POSTER</div>" +
-                        "<div class='posttime'>POSTTIME</div><br>" +
-                        "<div class='postscore'>SCORE</div>" +
-                        "<div class='posttitle'>TITLE</div>" +
+                if(forumData.Top == null) {
+                    $('#tops')[0].innerHTML = "<h1>It's Quiet Here</h1>";
+                    return;
+                }
+                $('#tops')[0].innerHTML = "";
+                for(let i = 0; i < forumData.Top.length; i++) {
+                    $('#tops')[0].innerHTML += "<div class='widget' onclick='window.location.href=\"/thread/?thread=" + forumData.Top[i].ID + "\"'>" + // TODO MORE FORMAT PLZZZ
+                        "<div class='posterlink' onclick='window.location.href=\"/forum/user/" + forumData.Top[i].Poster + "\"'>" + forumData.Top[i].Poster + "</div>" +
+                        "<div class='posttime'>" + forumData.Top[i].PostTime + "</div><br>" +
+                        "<div class='postscore'>" + forumData.Top[i].Score + "</div>" +
+                        "<div class='posttitle'>" + forumData.Top[i].Title + "</div>" +
                         "</div>";
+                }
             }
         });
     }
@@ -229,33 +237,27 @@
     <div class="time">
         <div class="dropbtn" onclick="$('.dropdown')[0].classList.toggle('show')">Time</div>
         <div class="dropdown">
-            <div class="time-sel" onclick="time=0;">Day</div>
-            <div class="time-sel" onclick="time=1;">Week</div>
-            <div class="time-sel" onclick="time=2;">Month</div>
-            <div class="time-sel" onclick="time=3;">Year</div>
-            <div class="time-sel" onclick="time=4;">Ever</div>
+            <div class="time-sel" onclick="time=0;update();">Day</div>
+            <div class="time-sel" onclick="time=1;update();">Week</div>
+            <div class="time-sel" onclick="time=2;update();">Month</div>
+            <div class="time-sel" onclick="time=3;update();">Year</div>
+            <div class="time-sel" onclick="time=4;update();">Ever</div>
         </div>
     </div>
     <div class="numpage">
         <div class="dropbtn" onclick="$('.dropdown')[1].classList.toggle('show')"># Per Page</div>
         <div class="dropdown">
-            <div class="num-sel" onclick="num=10;">10</div>
-            <div class="num-sel" onclick="num=20;">20</div>
-            <div class="num-sel" onclick="num=30;">30</div>
-            <div class="num-sel" onclick="num=40;">40</div>
-            <div class="num-sel" onclick="num=50;">50</div>
+            <div class="num-sel" onclick="num=10;update();">10</div>
+            <div class="num-sel" onclick="num=20;update();">20</div>
+            <div class="num-sel" onclick="num=30;update();">30</div>
+            <div class="num-sel" onclick="num=40;update();">40</div>
+            <div class="num-sel" onclick="num=50;update();">50</div>
         </div>
     </div>
 </div>
 
 <div id="tops">
-    {{if .Top}}
-        {{range $t := .Top}}
-            {{template "threadwidget" $t}}
-        {{end}}
-    {{else}}
-        <h1>its quiet here</h1>
-    {{end}}
+    <h1>its quiet here</h1>
 </div>
-
+<div class="footer" style="display: inline-block; font: 16px 'Times New Roman';width: -webkit-fill-available; margin-inline: 10px"><div onclick="page--;update();" style="float: left">Prev</div><div onclick="page++;update();" style="float: right;">Next</div></div>
 </html>

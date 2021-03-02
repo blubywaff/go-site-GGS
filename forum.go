@@ -45,9 +45,34 @@ func forumData(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "Invalid Parameters", http.StatusBadRequest)
 		return
 	}
-	single := func(i int, e error) int { return i }
-	s := func(i []byte, e error) []byte { return i }
-	fmt.Fprint(w, string(s(json.Marshal(getForums(single(strconv.Atoi(timeWindow[0])), single(strconv.Atoi(num[0])), single(strconv.Atoi(page[0])))))))
+
+	single := func(i int, e error) int { check(e); return i }
+	s := func(i []byte, e error) []byte { check(e); return i }
+
+	tw := single(strconv.Atoi(timeWindow[0]))
+	n := single(strconv.Atoi(num[0]))
+	p := single(strconv.Atoi(page[0]))
+
+	if tw < 0 || tw > 4 {
+		http.Error(w, "Invalid Time Parameter", http.StatusBadRequest)
+		return
+	}
+	if n < 0 {
+		http.Error(w, "Invalid Number Parameter", http.StatusBadRequest)
+		return
+	} else if n > 50 {
+		http.Error(w, "Do not request more than 50 at a time", http.StatusBadRequest)
+		return
+	}
+	if p < 0 {
+		http.Error(w, "Where are you trying to go?", http.StatusBadRequest)
+		return
+	} else if p >= 10000 {
+		http.Error(w, "Those records are on the high shelf!", http.StatusTeapot)
+		return
+	}
+
+	fmt.Fprint(w, string(s(json.Marshal(getForums(tw, n, p)))))
 }
 
 func createThread(w http.ResponseWriter, req *http.Request) {

@@ -35,10 +35,12 @@
             padding: 5px;
             font: 12px "Calibri";
             background: #424242;
+            margin-bottom: 5px;
         }
         .widget div {
             color: #eeeeee;
             display: inline-block;
+            margin-inline: 7px;
         }
         .widget .posterlink {
             color: #aaaaaa
@@ -50,7 +52,7 @@
             font: 14px "Arial Black"
         }
         .widget .posttitle {
-            font: 18px "Times New Roman"
+            font: 24px "Times New Roman"
         }
     </style>
 {{end}}
