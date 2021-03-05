@@ -21,10 +21,10 @@ func forumThread(w http.ResponseWriter, req *http.Request) {
 	}
 	threadID := threadIDQ[0]
 
-	if len(threadID) < 36 {
+	/*if len(threadID) < 36 {
 		http.Error(w, "Invalid Thread ID", http.StatusBadRequest)
 		return
-	}
+	}*/
 
 	if !containsThread(bson.D{{Key: "ID", Value: threadID}}) {
 		http.Redirect(w, req, "/forum/", http.StatusSeeOther)
@@ -181,6 +181,21 @@ func createComment(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	tpls.ExecuteTemplate(w, "createcomment.gohtml", nil)
+}
+
+func fullComment(w http.ResponseWriter, req *http.Request) {
+	if req.Method == http.MethodPost {
+		http.Error(w, "You can't send stuff here, silly!", http.StatusBadRequest)
+		return
+	}
+	id := req.URL.Query()["ID"]
+	if len(id) < 1 || len(id) > 1 {
+		http.Error(w, "Must have only one ID request", http.StatusBadRequest)
+	}
+	comment := getComment(id[0])
+	jsonP, _ := json.Marshal(comment.getFull())
+	fmt.Fprint(w, jsonP)
+
 }
 
 func addComment(rootid string, rootisthread bool, commentid string) {

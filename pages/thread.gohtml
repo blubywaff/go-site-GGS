@@ -1,6 +1,172 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 {{template "globalhead" .Title}}
+{{template "globals" ""}}
+
+<style>
+    * {
+        cursor: default;
+    }
+
+    #navbar {
+        --background: #ff2020;
+        --text-color: #ffffff;
+        --text-hover-color: #cccccc;
+    }
+
+    #navbar {
+        background-color: var(--background);
+        padding: 20px;
+        min-height: 32px;
+    }
+
+    #navbar .element {
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    #navbar .element #sidenav-button {
+        cursor: pointer;
+        display: inline-block;
+        margin-right: 20px;
+    }
+
+    #navbar .element #sidenav-button * {
+        width: 20px;
+        height: 3px;
+        background-color: var(--text-color);
+        margin: 4px 0;
+        transition: transform 0.5s, opacity 0.5s;
+        cursor: inherit;
+    }
+
+    #navbar .element #sidenav-button:hover * {
+        background-color: var(--text-hover-color);
+    }
+
+    #navbar .element .text {
+        font-size: x-large;
+        margin-right: 20px;
+        color: var(--text-color);
+        text-decoration: none;
+        cursor: pointer;
+        display: inline-block;
+    }
+
+    #navbar #nav .text {
+        float: right;
+    }
+
+    #navbar #account {
+        float: right;
+    }
+
+    .change #bar1 {
+        transform: translate(0px, 7px) rotate(-45deg);
+    }
+
+    .change #bar2 {
+        opacity: 0;
+    }
+
+    .change #bar3 {
+        transform: translate(0px, -7px) rotate(45deg);
+    }
+
+    #navbar .element div.text:hover {
+        color: var(--text-hover-color);
+    }
+
+    body {
+        background-color: #ffffff;
+    }
+
+    #sidenav {
+        z-index: 1;
+        transition: 0.5s;
+        background-color: #222222;
+        opacity: 80%;
+        height: 100%;
+        position: fixed;
+    }
+</style>
+
+<script>
+    function toggleSideNav() {
+        document.getElementById("sidenav").style.width = (document.getElementById("sidenav").style.width === "0px") ? "250px" : "0";
+        document.getElementById("sidenav-button").classList.toggle("change");
+    }
+</script>
+
+<script>
+    var forumData;
+
+    function update() {
+        $.ajax({
+            url: '/forum/comment/read/', // TODO
+            type: 'GET',
+            success: function (result) {
+                // TODO
+            }
+        });
+    }
+</script>
+
+<script>
+    window.onload = function(event) {
+        update();
+    }
+</script>
+
+<div id="navbar">
+    <div id="nav" class="element">
+        <div id="sidenav-button" onclick="toggleSideNav();">
+            <div id="bar1"></div>
+            <div id="bar2"></div>
+            <div id="bar3"></div>
+        </div>
+        <div id="game-nav" class="text" onclick="window.location.href='/webgame/'">Game</div>
+        <div id="forum-nav" class="text" onclick="window.location.href='/forum/'">Forum</div>
+        <div id="home-nav" class="text" onclick="window.location.href='/home/'">Home</div>
+    </div>
+    <div id="account" class="element">
+        <div id="account-nav" class="text" onclick="window.location.href='/login/'">Login</div>
+    </div>
+</div>
+
+<div id="sidenav" style="width: 0;">
+</div>
+
+<script>
+
+</script>
+
+<style>
+    body {
+        background: #333333;
+        color: #eeeeee;
+    }
+
+    div.content-wrapper {
+        margin-left: 20px;
+    }
+
+    div.title-line {
+        font: 36px "Times New Roman";
+    }
+
+    div.score-title-line {
+        vertical-align: center;
+    }
+
+    div.score-title-line .title-line {
+        display: inline-block;
+    }
+    div.score-title-line .score-line {
+        display: inline-block;
+    }
+</style>
+
 <body>
     {{template "thread" .}}
 </body>

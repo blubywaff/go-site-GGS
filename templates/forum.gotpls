@@ -1,5 +1,5 @@
 {{define "comment"}}
-<br xmlns="http://www.w3.org/1999/html">
+<br>
 <p>{{.Score}} -- {{.Poster}} --- {{.PostTime}}</p>
 <p><a href="/forum/vote/?comment={{.ID}}&vote=1">++</a><a href="/forum/vote/?comment={{.ID}}&vote=-1">--</a></p>
 <p>{{.Content}}</p>
@@ -10,19 +10,23 @@
 {{end}}
 
 {{define "thread"}}
-<p>{{.Poster}} --- {{.PostTime}}</p>
-<p><a href="/forum/vote/?thread={{.ID}}&vote=1">++</a><a href="/forum/vote/?thread={{.ID}}&vote=-1">--</a></p>
-<h1>{{.Score}} | {{.Title}}</h1>
-<p>{{.Body}}</p>
-<P><a href="/forum/comment/?thread={{.ID}}">Comment</a></P>
+<div class="content-wrapper">
+<div class="info-line">{{.Poster}} --- {{.PostTime}}</div>
+<div class="score-title-line">
+<div class="score-line"><div onclick="window.location.href='/forum/vote/?thread={{.ID}}&vote=1'">++</div>{{.Score}}<div onclick="window.location.href='/forum/vote/?thread={{.ID}}&vote=-1'">--</div></div>
+<div class="title-line">{{.Title}}</div>
+</div>
+<div class="body-area">{{.Body}}</div>
+<div class="comment-line"><div onclick="window.location.href='/forum/comment/?thread={{.ID}}'">Comment</div></div>
 {{range .Replies}}
 {{template "comment" .}}
 {{end}}
+</div>
 {{end}}
 
 {{define "threadwidget"}}
 <div class="widget">
-    <div class="posterlink" onlclick="window.location.href=/forum/user/{{.Poster}}">{{.Poster}}</div>
+    <div class="posterlink" onclick="window.location.href=/forum/user/{{.Poster}}">{{.Poster}}</div>
     <div class="posttime">{{timeify .PostTime}}</div><br>
     <div class="postscore">{{shortify .Score}}</div>
     <div class="posttitle">{{.Title}}</div>
