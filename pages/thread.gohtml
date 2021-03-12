@@ -99,14 +99,14 @@
 </script>
 
 <script>
-    var forumData;
+    var thread = "{{.ID}}";
 
     function update() {
         $.ajax({
-            url: '/forum/comment/read/', // TODO
+            url: '/forum/comment/read/?thread='+thread,
             type: 'GET',
             success: function (result) {
-                // TODO
+                console.log(result);
             }
         });
     }
@@ -115,6 +115,32 @@
 <script>
     window.onload = function(event) {
         update();
+        let commentClicks = $('.comment-line');
+        for(let i = 0; i < commentClicks.length; i++) {
+            console.log(commentClicks[i].firstChild);
+            commentClicks[i].firstChild.addEventListener('click', commentClickHandler);
+        }
+    }
+let eee;
+    function commentClickHandler(event) {
+        console.log(eee = event.target);
+        let inner = '<form method="post" id="create-comment-form">' +
+        '<textarea id="content" name="content" rows="5" cols="80" onclick="return false;">The content of your comment</textarea>' +
+        '</form>' +
+        '<button refID="<<REFID>>">Comment</button>';
+        inner = inner.replace("<<REFID>>", event.target.getAttribute("refID"));
+        let parent = event.target.parentNode;
+        parent.innerHTML = inner;
+        $(parent.childNodes).filter('button')[0].addEventListener('click', commentHandler)
+    }
+
+    function commentHandler(event) {
+        console.log("Submit Comment");
+        let ref = event.target.getAttribute("refID");
+        let text = event.target.previousSibling.firstChild.value;
+        console.log(text);
+        console.log($(event.target.previousSibling)[0]);
+        $.ajax({url:'/forum/comment/?'+ref, type: 'POST', data: new FormData($(event.target.previousSibling)[0]), contentType: false, processData: false, success: function(result){console.log(result)}});
     }
 </script>
 

@@ -95,7 +95,7 @@ func createThread(w http.ResponseWriter, req *http.Request) {
 
 func vote(w http.ResponseWriter, req *http.Request) {
 	if !alreadyLoggedIn(w, req) {
-		http.Redirect(w, req, "/", http.StatusSeeOther)
+		http.Error(w, "Not Logged In!", http.StatusUnauthorized)
 		return
 	}
 
@@ -141,7 +141,7 @@ func vote(w http.ResponseWriter, req *http.Request) {
 		writeVote(username, id, okthread, vote)
 		voteOn(id, okthread, vote)
 	}
-	http.Redirect(w, req, "/thread/?thread="+id, http.StatusSeeOther)
+	fmt.Fprint(w, "Vote Successful!")
 }
 
 func voteOn(id string, isThread bool, vote int) {
@@ -153,34 +153,73 @@ func voteOn(id string, isThread bool, vote int) {
 }
 
 func createComment(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
+		http.Error(w, "Post comment via thread page", http.StatusBadRequest)
+		return
+	}
+
 	if !alreadyLoggedIn(w, req) {
-		http.Redirect(w, req, "/", http.StatusSeeOther)
+		http.Error(w, "Must have session", http.StatusUnauthorized)
 		return
 	}
 
-	if req.Method == http.MethodPost {
-		content := req.FormValue("content")
-		username := getUser(w, req).Username
-		threadIDQ, okthread := req.URL.Query()["thread"]
-		commentIDQ, okcomment := req.URL.Query()["comment"]
-		var id string
-		if okthread && okcomment {
-			http.Error(w, "Both Thread and Comment Provided", http.StatusBadRequest)
-		} else if !okthread && !okcomment {
-			http.Error(w, "No Resource Provided", http.StatusBadRequest)
-		} else if okthread {
-			id = threadIDQ[0]
-		} else if okcomment {
-			id = commentIDQ[0]
-		}
-		uuid := uuid.New().String()
-
-		writeComment(Comment{username, content, time.Now(), 0, []string{}, uuid})
-		addComment(id, okthread, uuid)
-		http.Redirect(w, req, "/forum/"+id, http.StatusSeeOther)
+	content := req.FormValue("content")
+	username := getUser(w, req).Username
+	threadIDQ, okthread := req.URL.Query()["thread"]
+	commentIDQ, okcomment := req.URL.Query()["comment"]
+	var id string
+	if okthread && okcomment {
+		http.Error(w, "Both Thread and Comment Provided", http.StatusBadRequest)
 		return
+	} else if !okthread && !okcomment {
+		http.Error(w, "No Resource Provided", http.StatusBadRequest)
+		return
+	} else if okthread {
+		id = threadIDQ[0]
+	} else if okcomment {
+		id = commentIDQ[0]
 	}
-	tpls.ExecuteTemplate(w, "createcomment.gohtml", nil)
+	commentID := uuid.New().String()
+
+	fmt.Println(content)
+
+	writeComment(Comment{username, content, time.Now(), 0, []string{}, commentID})
+	addComment(id, okthread, commentID)
+	fmt.Fprint(w, "Comment Added!")
+	return
+}
+
+func readComments(w http.ResponseWriter, req *http.Request) {
+	threadIDQ, okthread := req.URL.Query()["thread"]
+	commentIDQ, okcomment := req.URL.Query()["comment"]
+	var id string
+	var item interface{}
+	if okthread && okcomment {
+		http.Error(w, "Both Thread and Comment Provided", http.StatusBadRequest)
+		return
+	} else if !okthread && !okcomment {
+		http.Error(w, "No Resource Provided", http.StatusBadRequest)
+		return
+	} else if okthread {
+		id = threadIDQ[0]
+		item = getThread(id)
+	} else if okcomment {
+		id = commentIDQ[0]
+		item = getThread(id)
+	}
+	//comment := getComment(id)
+	var comments []Comment
+	itemM, ok := item.(map[string]interface{})
+	fmt.Println(itemM)
+	fmt.Println(item)
+	fmt.Println(ok)
+	for _, k := range itemM["Replies"].([]string) {
+		comments = append(comments, getComment(k))
+	}
+	fmt.Println(comments)
+	fmt.Println(item)
+	jsonC, _ := json.Marshal(comments)
+	fmt.Fprint(w, string(jsonC))
 }
 
 func fullComment(w http.ResponseWriter, req *http.Request) {
