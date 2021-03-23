@@ -100,6 +100,16 @@
 
 <script>
     var thread = "{{.ID}}";
+    var commentTemplate = `<div class="content-wrapper">
+                            <div class="info-line"><<POSTER>> --- <<POSTTIME>></div>
+                            <div class="score-wrapper-line">
+                                <div class="score-line"><div onclick="$.ajax({url: '/forum/vote/?thread=<<ID>>&vote=1', type: 'POST', success: function(result){console.log(result);}});">++</div><<SCORE>><div onclick="$.ajax({url: '/forum/vote/?thread=<<ID>>&vote=1', type: 'POST', success: function(result){console.log(result);}});">--</div></div>
+                            </div>
+                            <div class="body-area"><<CONTENT>></div>
+                            <div class="comment-line"><div refID="thread='<<ID>>'">Comment</div></div>
+                            <div class="comments">
+                            </div>
+                        </div>`
 
     function update() {
         $.ajax({
@@ -107,6 +117,11 @@
             type: 'GET',
             success: function (result) {
                 console.log(result);
+                result = JSON.parse(result);
+                for (let i = 0; i < result.length; i++) {
+                    console.log(result[i]);
+                    $('.comments[ID="'+thread+'"]').innerHTML += commentTemplate.replace("<<POSTER>>", result[i].Poster)
+                }
             }
         });
     }

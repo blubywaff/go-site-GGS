@@ -205,20 +205,18 @@ func readComments(w http.ResponseWriter, req *http.Request) {
 		item = getThread(id)
 	} else if okcomment {
 		id = commentIDQ[0]
-		item = getThread(id)
+		item = getComment(id)
 	}
 	//comment := getComment(id)
-	var comments []Comment
-	itemM, ok := item.(map[string]interface{})
-	fmt.Println(itemM)
-	fmt.Println(item)
-	fmt.Println(ok)
-	for _, k := range itemM["Replies"].([]string) {
-		comments = append(comments, getComment(k))
+	var itemM []FullComment
+	if okthread {
+		itemM = item.(Thread).getFull().Replies
+	} else {
+		itemM = item.(Comment).getFull().Replies
 	}
-	fmt.Println(comments)
 	fmt.Println(item)
-	jsonC, _ := json.Marshal(comments)
+	fmt.Println(itemM)
+	jsonC, _ := json.Marshal(itemM)
 	fmt.Fprint(w, string(jsonC))
 }
 
