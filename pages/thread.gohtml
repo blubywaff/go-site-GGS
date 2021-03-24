@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 {{template "globalhead" .Title}}
-{{template "globals" ""}}
 
 <style>
     * {
@@ -99,54 +98,24 @@
 </script>
 
 <script>
-    var thread = "{{.ID}}";
-    var commentTemplate = `<div class="content-wrapper">
-                            <div class="info-line"><<POSTER>> --- <<POSTTIME>></div>
-                            <div class="score-wrapper-line">
-                                <div class="score-line"><div onclick="$.ajax({url: '/forum/vote/?thread=<<ID>>&vote=1', type: 'POST', success: function(result){console.log(result);}});">++</div><<SCORE>><div onclick="$.ajax({url: '/forum/vote/?thread=<<ID>>&vote=1', type: 'POST', success: function(result){console.log(result);}});">--</div></div>
-                            </div>
-                            <div class="body-area"><<CONTENT>></div>
-                            <div class="comment-line"><div refID="thread='<<ID>>'">Comment</div></div>
-                            <div class="comments">
-                            </div>
-                        </div>`
-
-    function update() {
-        $.ajax({
-            url: '/forum/comment/read/?thread='+thread,
-            type: 'GET',
-            success: function (result) {
-                console.log(result);
-                result = JSON.parse(result);
-                for (let i = 0; i < result.length; i++) {
-                    console.log(result[i]);
-                    $('.comments[ID="'+thread+'"]').innerHTML += commentTemplate.replace("<<POSTER>>", result[i].Poster)
-                }
-            }
-        });
-    }
-</script>
-
-<script>
     window.onload = function(event) {
-        update();
         let commentClicks = $('.comment-line');
         for(let i = 0; i < commentClicks.length; i++) {
             console.log(commentClicks[i].firstChild);
             commentClicks[i].firstChild.addEventListener('click', commentClickHandler);
         }
     }
-let eee;
+
     function commentClickHandler(event) {
         console.log(eee = event.target);
         let inner = '<form method="post" id="create-comment-form">' +
-        '<textarea id="content" name="content" rows="5" cols="80" onclick="return false;">The content of your comment</textarea>' +
+        '<textarea id="content" name="content" rows="5" cols="80" onclick="return false;" placeholder="The content of your comment"></textarea>' +
         '</form>' +
         '<button refID="<<REFID>>">Comment</button>';
         inner = inner.replace("<<REFID>>", event.target.getAttribute("refID"));
         let parent = event.target.parentNode;
         parent.innerHTML = inner;
-        $(parent.childNodes).filter('button')[0].addEventListener('click', commentHandler)
+        $(parent.childNodes).filter('button')[0].addEventListener('click', commentHandler);
     }
 
     function commentHandler(event) {
