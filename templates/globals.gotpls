@@ -39,6 +39,33 @@
 
 {{define "globalscripts"}}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script id="number-display-script">
+        function numberify(number) {
+            if(number === 0) {
+                return "0";
+            }
+            let digs = Math.trunc(Math.log10(number));
+            let num = Math.round(number/(Math.pow(10, digs-1-(digs%3))))/10;
+            let suffix = "";
+            let sufmap = {
+                0: "",
+                1: "",
+                2: "",
+                3: "k",
+                4: "tk",
+                5: "hk",
+                6: "m",
+                7: "tm",
+                8: "hm",
+                9: "b",
+                10: "tb",
+                11: "hb",
+                12: "t",
+            };
+            suffix = sufmap[digs - digs%3];
+            return num + suffix;
+        }
+    </script>
 {{end}}
 
 {{define "globals"}}

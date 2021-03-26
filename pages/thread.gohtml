@@ -98,15 +98,27 @@
 </script>
 
 <script>
+    function numifyAll() {
+        let scores = $('.score-line .score-display');
+        for (let i = 0; i < scores.length; i++) {
+            let score = scores[i];
+            score.innerText = numberify(parseInt(score.innerText));
+        }
+    }
+</script>
+
+<script>
     window.onload = function(event) {
         let commentClicks = $('.comment-line');
         for(let i = 0; i < commentClicks.length; i++) {
             console.log(commentClicks[i].firstChild);
             commentClicks[i].firstChild.addEventListener('click', commentClickHandler);
         }
+        numifyAll();
     }
 
     function commentClickHandler(event) {
+        commentCloseHandler(event);
         console.log(eee = event.target);
         let inner = '<form method="post" id="create-comment-form">' +
         '<textarea id="content" name="content" rows="5" cols="80" onclick="return false;" placeholder="The content of your comment"></textarea>' +
@@ -116,6 +128,17 @@
         let parent = event.target.parentNode;
         parent.innerHTML = inner;
         $(parent.childNodes).filter('button')[0].addEventListener('click', commentHandler);
+    }
+
+    function commentCloseHandler(event) {
+        let cLines = $('.comment-line');
+        for (let i = 0; i < cLines.length; i++) {
+            if(cLines[i].firstChild.matches('form')) {
+                let refID = cLines.eq(0).children().find('button').attr('refID');
+                cLines[i].innerHTML = "<div refid='"+refID+"'>Comment</div>";
+                cLines[i].firstChild.addEventListener('click', commentClickHandler);
+            }
+        }
     }
 
     function commentHandler(event) {
@@ -140,7 +163,7 @@
         <div id="home-nav" class="text" onclick="window.location.href='/home/'">Home</div>
     </div>
     <div id="account" class="element">
-        <div id="account-nav" class="text" onclick="window.location.href='/login/'">Login</div>
+        <div id="account-nav" class="text clickable" onclick="window.location.href='/account/'">{{if .}}<img src="/account/profilepicture" width="32px">{{else}}Login{{end}}</div>
     </div>
 </div>
 
@@ -163,10 +186,31 @@
 
     div.title-line {
         font: 36px "Times New Roman";
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        margin-left: 10px;
     }
 
     div.score-title-line {
         vertical-align: center;
+        position: relative;
+    }
+
+    div.score-line .like-button {
+        margin-bottom: -7px;
+    }
+
+    div.score-line .dislike-button {
+        margin-top: -7px;
+    }
+
+    div.score-line .like-button:hover{
+        color: #88f
+    }
+
+    div.score-line .dislike-button:hover {
+        color: #f88
     }
 
     div.score-title-line .title-line {

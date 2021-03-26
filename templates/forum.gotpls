@@ -2,7 +2,7 @@
     <div class="content-wrapper" ID="{{.ID}}">
         <div class="info-line">{{.Poster}} --- {{.PostTime}}</div>
         <div class="score-wrapper-line">
-            <div class="score-line"><div onclick="$.ajax({url: '/forum/vote/?comment={{.ID}}&vote=1', type: 'POST', success: function(result){console.log(result);}});">++</div>{{.Score}}<div onclick="$.ajax({url: '/forum/vote/?comment={{.ID}}&vote=1', type: 'POST', success: function(result){console.log(result);}});">--</div></div>
+            <div class="score-line"><div class="like-button" onclick="$.ajax({url: '/forum/vote/?comment={{.ID}}&vote=1', type: 'POST', success: function(result){console.log(result);}});">++</div><div class="score-display">{{.Score}}</div><div class="dislike-button" onclick="$.ajax({url: '/forum/vote/?comment={{.ID}}&vote=1', type: 'POST', success: function(result){console.log(result);}});">--</div></div>
         </div>
         <div class="body-area">{{.Content}}</div>
         <div class="comment-line"><div refID="comment={{.ID}}">Comment</div></div>
@@ -18,7 +18,7 @@
 <div class="content-wrapper" ID="{{.ID}}">
 <div class="info-line">{{.Poster}} --- {{.PostTime}}</div>
 <div class="score-title-line">
-<div class="score-line"><div onclick="$.ajax({url: '/forum/vote/?thread={{.ID}}&vote=1', type: 'POST', success: function(result){console.log(result);}});">++</div>{{.Score}}<div onclick="$.ajax({url: '/forum/vote/?thread={{.ID}}&vote=1', type: 'POST', success: function(result){console.log(result);}});">--</div></div>
+<div class="score-line"><div class="like-button" onclick="$.ajax({url: '/forum/vote/?thread={{.ID}}&vote=1', type: 'POST', success: function(result){console.log(result);}});">++</div><div class="score-display">{{.Score}}</div><div class="dislike-button" onclick="$.ajax({url: '/forum/vote/?thread={{.ID}}&vote=1', type: 'POST', success: function(result){console.log(result);}});">--</div></div>
 <div class="title-line">{{.Title}}</div>
 </div>
 <div class="body-area">{{.Body}}</div>
