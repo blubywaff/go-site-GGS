@@ -1,10 +1,42 @@
 <!DOCTYPE html>
 <html>
 {{template "globalhead" "Start!"}}
-<body>
-<h3>You are ready to start a base!</h3>
-<button onclick="gameAjax('init', null, function(res){console.log(res);});gameAjax('real', null, function(res){console.log(res);});setTimeout(function(){window.location.href='/webgame/';}, 1000);">Start!</button>
 
+<style>
+    body {
+        background: #424242;
+        color: #eeeeee;
+        font: 26pt "Times New Roman";
+    }
+    #wrapper {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    #inner-wrapper {
+        top: 50%;
+        transform: translate(0%, 50%);
+        text-align: center;
+    }
+    #button {
+        background: #ee1111;
+        border: none;
+        font: 40pt "Arial Black";
+        color: #000000;
+    }
+    #button:hover {
+        color: #ee1111;
+        background: #8888ff;
+    }
+</style>
+
+<body>
+<div id="wrapper">
+<div id="inner-wrapper">
+<h3 id="header">You are ready to start a base!</h3>
+<button id="button" onclick="gameAjax('init', null, function(res){console.log(res);});gameAjax('real', null, function(res){console.log(res);});setTimeout(function(){window.location.href='/webgame/';}, 1000);">Start!</button>
+</div>
+</div>
 </body>
     {{template "gameAJAX"}}
 </html>

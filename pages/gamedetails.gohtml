@@ -1,7 +1,33 @@
 <!DOCTYPE html>
 <html>
 {{template "globalhead" "Game Details"}}
+<style>
+    body {
+        font: 12pt "Times New Roman";
+        background: #424242;
+        color: #eeeeee;
+    }
+    h2 {
+        font: 18pt "Arial Black";
+    }
+    #wrapper {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        margin: 50px;
+    }
+    #inner-wrapper {
+        transform: translateX(40%);
+        width: 80%;
+    }
+    #inner2-wrapper {
+        max-width: 400px;
+    }
+</style>
 <body>
+<div id="wrapper">
+<div id="inner-wrapper">
+<div id="inner2-wrapper">
 <h2>Overview</h2>
 <p>This will a resource management multiplayer game. Players will have to manage an empire in space. They will potentially have to invade other players territory to gain riches or glory.</p>
 <h2>Base Management</h2>
@@ -9,5 +35,8 @@
 <h2>Invasions</h2>
 <p>Players can choose to invade in which case the player will be send to another player’s base of similar power to the invader’s base and the player can attack the base to gain resources. If the invader destroys the enemy’s base, then they get an Invasion Token, if the invader is unsuccessful then the defender gets and Invasion Token. Invasion Tokens are a special currency that will allow players to expedite processes and gain temporary boosts.
     Invasions have no effect on the defender.</p>
+</div>
+</div>
+</div>
 </body>
 </html>

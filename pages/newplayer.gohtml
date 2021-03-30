@@ -1,11 +1,70 @@
 <!DOCTYPE html>
 <html>
 {{template "globalhead" "New Player"}}
+
+<style>
+    body {
+        background: #424242;
+    }
+
+    #outer-wrapper {
+        color: #eeeeee;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    #content-wrapper {
+        top: 50%;
+        transform: translate(0%, 50%);
+        text-align: center;
+    }
+
+    #intro {
+        font: 32pt "Times New Roman";
+    }
+
+    .separator {
+        padding-bottom: 50px;
+    }
+
+    #options {
+        font: 24pt "Times New Roman";
+    }
+
+    .separator-mini {
+        padding-bottom: 30px;
+    }
+
+    .option {
+        font: 18pt "Times New Roman";
+        margin-bottom: 10px;
+    }
+
+    .option:hover {
+        color: #8888ff;
+    }
+
+    .keyword {
+        display: inline-block;
+        font-weight: bold;
+    }
+</style>
+
 <body>
-<h3>You appear to be a new player!</h3>
-<p>You can:</p>
-<a href="/webgame/training">Play at the <b>Training Ground</b></a><br>
-<a href="/webgame/details">Read the <b>Game Details</b></a><br>
-<a href="/webgame/start">Or go straight to a <b>New Base</b></a><br>
+<div id="outer2-wrapper">
+<div id="outer-wrapper">
+<div id="content-wrapper">
+<div id="intro">You appear to be a new player!</div>
+<div class="separator"></div>
+<div id="options">You can:
+    <div class="separator-mini"></div>
+    <!--<div class="option" onclick="window.location.href='/webgame/training'">Play at the <div class="keyword">Training Ground</div></div>-->
+    <div class="option" onclick="window.location.href='/webgame/details'">Read the <div class="keyword">Details</div></div>
+    <div class="option" onclick="window.location.href='/webgame/start'">Or go straight to a <div class="keyword">New Base</div></div>
+</div>
+</div>
+</div>
+</div>
 </body>
 </html>
